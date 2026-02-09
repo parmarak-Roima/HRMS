@@ -34,14 +34,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String token = null;
         String email = null;
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            token = authHeader.substring(7);
-            email = jwtUtils.extractUsername(token);
+        if(authHeader == null || !authHeader.startsWith(("Bearer ")) ){
+            filterChain.doFilter(request,response);
+            return;
         }
+        token = authHeader.substring(7);
+        email = jwtUtils.extractUsername(token);
 
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null && jwtUtils.validateToken(token)) {
                 String role = jwtUtils.extractRole(token);
-
                 // Add ROLE_ prefix because Spring Security expects it
                 List<SimpleGrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role));
                 UserDetails userDetails = new User(email, "", authorities); // Password empty
