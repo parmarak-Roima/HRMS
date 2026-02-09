@@ -1,9 +1,8 @@
-package com.HRMS.HRMS.Controllers;
+package com.HRMS.HRMS.Controllers.Travel;
 
 import com.HRMS.HRMS.dto.CustomUserPrincipal;
 import com.HRMS.HRMS.dto.TravelDtos.CreateTravelDto;
 import com.HRMS.HRMS.dto.TravelDtos.ShowTravelDto;
-import com.HRMS.HRMS.entity.TravelEntities.Travel;
 import com.HRMS.HRMS.service.TravelService;
 import com.HRMS.HRMS.dto.ApiResponse;
 import jakarta.validation.Valid;

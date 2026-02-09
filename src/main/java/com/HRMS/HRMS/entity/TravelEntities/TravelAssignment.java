@@ -32,7 +32,7 @@ public class TravelAssignment extends BaseEntity {
     private LocalDate endDate;
 
     @Enumerated(EnumType.STRING)
-    private TravelStatus status;
+    private TravelStatus status = TravelStatus.SCHEDULED;
 
     @OneToMany(mappedBy = "travelAssignment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TravelExpense> travelExpenses = new ArrayList<>();
