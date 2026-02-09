@@ -8,6 +8,7 @@ import jakarta.persistence.Table;
 import lombok.Data;
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +27,12 @@ public class Travel  extends BaseEntity {
 
     @Column
     private String destination;
+
+    @Column(name = "s_date")
+    private LocalDate startDate;
+
+    @Column(name = "e_date")
+    private LocalDate endDate;
 
     @Column(columnDefinition = "TEXT")
     private String description;

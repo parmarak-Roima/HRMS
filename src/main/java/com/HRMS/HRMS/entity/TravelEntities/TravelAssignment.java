@@ -1,6 +1,7 @@
 package com.HRMS.HRMS.entity.TravelEntities;
 import com.HRMS.HRMS.entity.BaseEntity;
 import com.HRMS.HRMS.entity.Employee;
+import com.HRMS.HRMS.entity.Enums.TravelStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDate;
@@ -29,6 +30,9 @@ public class TravelAssignment extends BaseEntity {
 
     @Column(name = "e_date")
     private LocalDate endDate;
+
+    @Enumerated(EnumType.STRING)
+    private TravelStatus status;
 
     @OneToMany(mappedBy = "travelAssignment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TravelExpense> travelExpenses = new ArrayList<>();

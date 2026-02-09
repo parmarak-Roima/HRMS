@@ -1,5 +1,6 @@
 package com.HRMS.HRMS.filters;
 
+import com.HRMS.HRMS.dto.CustomUserPrincipal;
 import com.HRMS.HRMS.utils.JwtUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -32,21 +33,22 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
         String token = null;
-        String email = null;
-
         if(authHeader == null || !authHeader.startsWith(("Bearer ")) ){
             filterChain.doFilter(request,response);
             return;
         }
         token = authHeader.substring(7);
-        email = jwtUtils.extractUsername(token);
 
-        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null && jwtUtils.validateToken(token)) {
+
+        if ( SecurityContextHolder.getContext().getAuthentication() == null && jwtUtils.validateToken(token)) {
                 String role = jwtUtils.extractRole(token);
+                Long id = jwtUtils.extractId(token);
+                String name = jwtUtils.extractName(token);
+                String email = jwtUtils.extractUsername(token);
                 // Add ROLE_ prefix because Spring Security expects it
                 List<SimpleGrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role));
-                UserDetails userDetails = new User(email, "", authorities); // Password empty
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
+                CustomUserPrincipal principal = new CustomUserPrincipal(id, email, name, role);
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(principal, null, authorities);
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request)); // converts servelet class to the java classes
                 SecurityContextHolder.getContext().setAuthentication(authToken);
         }
