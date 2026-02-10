@@ -29,7 +29,7 @@ public class EmployeeCreateDTO {
     private String passwordHash; // Plain password for creation
 
     @NotNull(message = "Role is required")
-    private EmployeeRole role;
+    private Long role_id;
 
     @NotNull(message = "Birthdate is required")
     @Past(message = "Birthdate must be in the past")

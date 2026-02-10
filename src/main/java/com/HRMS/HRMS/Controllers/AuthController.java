@@ -4,6 +4,7 @@ import com.HRMS.HRMS.dto.AuthDtos.AuthResponse;
 import com.HRMS.HRMS.dto.AuthDtos.LoginRequest;
 import com.HRMS.HRMS.dto.EmployeeCreateDTO;
 import com.HRMS.HRMS.entity.Employee;
+import com.HRMS.HRMS.repository.RoleRepository;
 import com.HRMS.HRMS.service.EmployeeService;
 import com.HRMS.HRMS.utils.JwtUtils;
 import jakarta.validation.Valid;
@@ -27,15 +28,17 @@ public class AuthController {
     private final JwtUtils jwtUtils;
 
     private final AuthenticationManager authenticationManager;
+    private final RoleRepository roleRepository;
 
     public AuthController(
             EmployeeService employeeService,
             JwtUtils jwtUtils,
-            AuthenticationManager authenticationManager
-    ){
+            AuthenticationManager authenticationManager,
+            RoleRepository roleRepository){
         this.employeeService = employeeService;
         this.authenticationManager = authenticationManager;
         this.jwtUtils = jwtUtils;
+        this.roleRepository = roleRepository;
     }
 
     @PostMapping("/register")
@@ -63,7 +66,7 @@ public class AuthController {
 
                 String token = jwtUtils.generateToken(
                         employee.getEmail(),
-                        String.valueOf(employee.getRole()),
+                        employee.getRole().getRole(),
                         employee.getId(),
                         employee.getName()
                 );

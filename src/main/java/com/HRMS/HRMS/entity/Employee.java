@@ -2,6 +2,7 @@ package com.HRMS.HRMS.entity;
 
 import com.HRMS.HRMS.entity.Enums.Designations;
 import com.HRMS.HRMS.entity.Enums.EmployeeRole;
+import com.HRMS.HRMS.entity.TravelEntities.ExpenseType;
 import com.HRMS.HRMS.entity.TravelEntities.Travel;
 import com.HRMS.HRMS.entity.TravelEntities.TravelAssignment;
 import jakarta.persistence.*;
@@ -39,9 +40,10 @@ public class Employee {
     @Column(nullable = false)
     private String passwordHash;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private EmployeeRole role;
+
+    @ManyToOne
+    @JoinColumn(name = "role_id")
+    private Role role;
 
     @Column(nullable = false)
     private LocalDate birthdate;
