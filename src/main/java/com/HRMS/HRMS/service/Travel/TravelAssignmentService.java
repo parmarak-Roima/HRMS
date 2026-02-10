@@ -1,7 +1,6 @@
-package com.HRMS.HRMS.service;
+package com.HRMS.HRMS.service.Travel;
 
-import com.HRMS.HRMS.dto.*;
-import com.HRMS.HRMS.dto.TravelDtos.ShowTravelDto;
+import com.HRMS.HRMS.dto.CustomUserPrincipal;
 import com.HRMS.HRMS.dto.TravelDtos.TravelAssignmentCreateDto;
 import com.HRMS.HRMS.dto.TravelDtos.TravelAssignmentResponseDto;
 import com.HRMS.HRMS.dto.TravelDtos.TravelAssignmentUpdateDto;
@@ -9,12 +8,14 @@ import com.HRMS.HRMS.entity.Employee;
 import com.HRMS.HRMS.entity.Enums.TravelStatus;
 import com.HRMS.HRMS.entity.TravelEntities.Travel;
 import com.HRMS.HRMS.entity.TravelEntities.TravelAssignment;
+import com.HRMS.HRMS.exception.ForBiddenException;
 import com.HRMS.HRMS.exception.ResourceNotFoundException;
 import com.HRMS.HRMS.repository.EmployeeRepository;
 import com.HRMS.HRMS.repository.TravelRepositories.TravelAssignmentRepo;
 import com.HRMS.HRMS.repository.TravelRepositories.TravelRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,7 +44,8 @@ public class TravelAssignmentService {
         this.employeeRepo = employeeRepository;
     }
 
-    public TravelAssignmentResponseDto createAssignment(TravelAssignmentCreateDto dto) {
+    public TravelAssignmentResponseDto createAssignment(TravelAssignmentCreateDto dto, CustomUserPrincipal user) {
+
         //validations
         if (assignmentRepo.existsByTravelIdAndEmployeeId(dto.getTravelId(), dto.getEmployeeId())) {
             throw new IllegalArgumentException("Employee is already assigned to this trip.");
@@ -53,6 +55,9 @@ public class TravelAssignmentService {
         Employee employee = employeeRepo.findById(dto.getEmployeeId())
                 .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
 
+        if( !travel.getCreatedBy().getId().equals(user.getId()) ){
+            throw new ForBiddenException("you are not authorized to create for this travel !!") ;
+        }
         //create travel assignment
         TravelAssignment assignment = new TravelAssignment();
         assignment.setTravel(travel);
@@ -66,21 +71,36 @@ public class TravelAssignmentService {
         return mapToResponse(saved);
     }
 
-    public TravelAssignmentResponseDto updateAssignment(Long id, TravelAssignmentUpdateDto dto) {
+    public TravelAssignmentResponseDto updateAssignment(Long id, TravelAssignmentUpdateDto dto,CustomUserPrincipal user) {
         TravelAssignment assignment = assignmentRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(" travel - Assignment not found!!!"));
+        if( !assignment.getTravel().getCreatedBy().getId().equals(user.getId()) ){
+            throw new ForBiddenException("you are not authorized to update this travel assignment !!") ;
+        }
         modelMapper.map(dto, assignment);
         TravelAssignment updated = assignmentRepo.save(assignment);
         return mapToResponse(updated);
     }
 
-    public List<TravelAssignmentResponseDto> getEmployeeTravels(Long employeeId) {
+    public List<TravelAssignmentResponseDto> getEmployeeTravels(Long employeeId,CustomUserPrincipal user) {
+        if( !user.getRole().equals("HR") ) {
+            Employee employee = employeeRepo.findById(employeeId)
+                    .orElseThrow(() -> new ResourceNotFoundException(" employee not found!!!"));
+
+            Long managerId = (employee.getManager() != null) ? employee.getManager().getId() : null;
+            if (!user.getId().equals(employeeId) && !user.getId().equals(managerId)) {
+                throw new ForBiddenException("You are not allowed to view this employee's travels");
+            }
+        }
         return assignmentRepo.findByEmployeeId(employeeId).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
-    public List<TravelAssignmentResponseDto> getTeamTravels(Long managerId) {
+    public List<TravelAssignmentResponseDto> getTeamTravels(Long managerId,CustomUserPrincipal user) {
+        if(!user.getId().equals(managerId)){
+            throw new ForBiddenException("you can not access this team travels !!");
+        }
         return assignmentRepo.findTeamTravels(managerId).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());

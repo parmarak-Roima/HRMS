@@ -12,6 +12,7 @@ import io.jsonwebtoken.JwtException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.web.client.HttpClientErrorException;
 
 
 import java.time.LocalDateTime;
@@ -56,6 +57,11 @@ public class GlobalExceptionHandler {
             errors.put(error.getField(), error.getDefaultMessage());
         }
         return buildResponse(HttpStatus.BAD_REQUEST, "Validation Failed", request, errors);
+    }
+
+    @ExceptionHandler(ForBiddenException.class)
+    public ResponseEntity<ErrorResponse> handleForbidden(ForBiddenException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.FORBIDDEN, ex.getMessage(), request, null);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

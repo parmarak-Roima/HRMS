@@ -39,7 +39,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
         token = authHeader.substring(7);
 
-
         if ( SecurityContextHolder.getContext().getAuthentication() == null && jwtUtils.validateToken(token)) {
                 String role = jwtUtils.extractRole(token);
                 Long id = jwtUtils.extractId(token);

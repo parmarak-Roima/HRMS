@@ -3,7 +3,7 @@ package com.HRMS.HRMS.Controllers.Travel;
 import com.HRMS.HRMS.dto.CustomUserPrincipal;
 import com.HRMS.HRMS.dto.TravelDtos.CreateTravelDto;
 import com.HRMS.HRMS.dto.TravelDtos.ShowTravelDto;
-import com.HRMS.HRMS.service.TravelService;
+import com.HRMS.HRMS.service.Travel.TravelService;
 import com.HRMS.HRMS.dto.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,8 +36,9 @@ public class TravelControllers {
                 HttpStatus.CREATED
         );
     }
-
+    //only admin
     @GetMapping("all")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<ShowTravelDto>>> getAllTravel() {
         return new ResponseEntity<>(
                 new ApiResponse<>("all travels", travelService.getAllTravels()),
@@ -45,22 +46,28 @@ public class TravelControllers {
         );
     }
 
+    //only hr and empolyee assigned to that travel
     @GetMapping("{id}")
     public ResponseEntity<ApiResponse<ShowTravelDto>> getTravelById(@PathVariable Long id) {
+        CustomUserPrincipal user = (CustomUserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return new ResponseEntity<>(
-                new ApiResponse<>("travel_by_id", travelService.getTravelById(id)),
+                new ApiResponse<>("travel_by_id", travelService.getTravelById(id,user)),
                 HttpStatus.OK
         );
     }
 
+    //only hr
     @PatchMapping("{id}")
+    @PreAuthorize("hasRole('HR')")
     public ResponseEntity<ApiResponse<ShowTravelDto>> updateTravel(@PathVariable Long id , @RequestBody CreateTravelDto createTravelDto ) {
+        CustomUserPrincipal user = (CustomUserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return new ResponseEntity<>(
-                new ApiResponse<>("travel updated successfully!", travelService.updateTravel(id,createTravelDto)),
+                new ApiResponse<>("travel updated successfully!", travelService.updateTravel(id,createTravelDto,user)),
                 HttpStatus.OK
         );
     }
 
+    //only hr for that travel
     @GetMapping("HR")
     @PreAuthorize("hasRole('HR')")
     public ResponseEntity<ApiResponse<List<ShowTravelDto>>> getTravelForHr() {

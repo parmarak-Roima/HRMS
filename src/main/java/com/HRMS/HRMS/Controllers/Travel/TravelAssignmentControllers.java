@@ -1,13 +1,16 @@
 package com.HRMS.HRMS.Controllers.Travel;
 
 import com.HRMS.HRMS.dto.ApiResponse;
+import com.HRMS.HRMS.dto.CustomUserPrincipal;
 import com.HRMS.HRMS.dto.TravelDtos.TravelAssignmentCreateDto;
 import com.HRMS.HRMS.dto.TravelDtos.TravelAssignmentResponseDto;
 import com.HRMS.HRMS.dto.TravelDtos.TravelAssignmentUpdateDto;
-import com.HRMS.HRMS.service.TravelAssignmentService;
+import com.HRMS.HRMS.service.Travel.TravelAssignmentService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,33 +26,43 @@ public class TravelAssignmentControllers {
         this.travelAssignmentService = travelAssignmentService;
     }
 
+    //only hr assigned to that travel
     @PostMapping
+    @PreAuthorize("hasRole('HR')")
     public ResponseEntity<ApiResponse<TravelAssignmentResponseDto>> assignEmployee(
             @Valid @RequestBody TravelAssignmentCreateDto dto) {
-        TravelAssignmentResponseDto response = travelAssignmentService.createAssignment(dto);
+        CustomUserPrincipal user = (CustomUserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        TravelAssignmentResponseDto response = travelAssignmentService.createAssignment(dto,user);
         return ResponseEntity.ok(new ApiResponse<>("Employee assigned successfully", response));
     }
 
+    //only hr for that travel
     @PatchMapping("/{id}")
+    @PreAuthorize("hasRole('HR')")
     public ResponseEntity<ApiResponse<TravelAssignmentResponseDto>> updateAssignment(
             @PathVariable Long id,
             @RequestBody TravelAssignmentUpdateDto dto) {
-        TravelAssignmentResponseDto response = travelAssignmentService.updateAssignment(id, dto);
+        CustomUserPrincipal user = (CustomUserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        TravelAssignmentResponseDto response = travelAssignmentService.updateAssignment(id, dto,user);
         return ResponseEntity.ok(new ApiResponse<>("Assignment updated successfully", response));
     }
 
+    //only employee and manager of them
     @GetMapping("/employee/{empId}")
     public ResponseEntity<ApiResponse<List<TravelAssignmentResponseDto>>> getEmployeeTravels(
             @PathVariable Long empId) {
-        List<TravelAssignmentResponseDto> list = travelAssignmentService.getEmployeeTravels(empId);
+        CustomUserPrincipal user = (CustomUserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        List<TravelAssignmentResponseDto> list = travelAssignmentService.getEmployeeTravels(empId,user);
         return ResponseEntity.ok(new ApiResponse<>("Fetched employee travels", list));
     }
 
+    //only manager
     @GetMapping("/manager/{managerId}")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<ApiResponse<List<TravelAssignmentResponseDto>>> getTeamTravels(
             @PathVariable Long managerId) {
-        List<TravelAssignmentResponseDto> list = travelAssignmentService.getTeamTravels(managerId);
+        CustomUserPrincipal user = (CustomUserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        List<TravelAssignmentResponseDto> list = travelAssignmentService.getTeamTravels(managerId,user);
         return ResponseEntity.ok(new ApiResponse<>("Fetched employee travels", list));
     }
-
 }

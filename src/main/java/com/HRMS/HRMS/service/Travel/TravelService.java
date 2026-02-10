@@ -1,4 +1,4 @@
-package com.HRMS.HRMS.service;
+package com.HRMS.HRMS.service.Travel;
 
 import com.HRMS.HRMS.dto.CustomUserPrincipal;
 import com.HRMS.HRMS.dto.TravelDtos.CreateTravelDto;
@@ -7,7 +7,7 @@ import com.HRMS.HRMS.entity.Employee;
 import com.HRMS.HRMS.entity.Enums.TravelStatus;
 import com.HRMS.HRMS.entity.TravelEntities.Travel;
 import com.HRMS.HRMS.entity.TravelEntities.TravelAssignment;
-import com.HRMS.HRMS.entity.TravelEntities.TravelDoc;
+import com.HRMS.HRMS.exception.ForBiddenException;
 import com.HRMS.HRMS.exception.ResourceNotFoundException;
 import com.HRMS.HRMS.repository.EmployeeRepository;
 import com.HRMS.HRMS.repository.TravelRepositories.TravelAssignmentRepo;
@@ -16,9 +16,9 @@ import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -92,9 +92,31 @@ public class TravelService {
                 .collect(Collectors.toList());
     }
 
-    public ShowTravelDto getTravelById(Long id) {
+    public ShowTravelDto getTravelById(Long id,CustomUserPrincipal user) {
+        //find travel by id
         Travel travel = travelRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Travel Plan not found with ID: " + id));
+        //check if this travel is created by hr or not
+        if( user.getRole().equals("HR") && !travel.getCreatedBy().getId().equals(user.getId()) ){
+            throw new ForBiddenException("you are not authorized to get this travel !!") ;
+        }
+        //check if this employee assigned to travel or not
+        List<Long> assignmentIds = travel.getTravelAssignments()
+                .stream()
+                .map(TravelAssignment::getId)
+                .toList();
+        List<Long> assignmentManagerIds = travel.getTravelAssignments()
+                .stream()
+                .map(ta -> {
+                    if (ta.getEmployee().getManager() != null) {
+                        return ta.getEmployee().getManager().getId();
+                    }
+                    return null;
+                }) .filter(Objects::nonNull)
+                .toList();
+        if(  !assignmentIds.contains(user.getId()) && !assignmentManagerIds.contains(user.getId()) ){
+            throw new ForBiddenException("you are not authorized to see this travel !!");
+        }
         ShowTravelDto travelDto =  modelMapper.map(travel, ShowTravelDto.class);
 
         if (travelDto.getEmployeeIdsToAssign() == null) {
@@ -109,12 +131,14 @@ public class TravelService {
     }
 
     @Transactional
-    public ShowTravelDto updateTravel(Long id, CreateTravelDto travelDto) {
+    public ShowTravelDto updateTravel(Long id, CreateTravelDto travelDto,CustomUserPrincipal user) {
         Travel existingTravel = travelRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Travel Plan not found with ID: " + id));
-
+        //check if this travel is created by hr or not
+        if( user.getRole().equals("HR") && !existingTravel.getCreatedBy().getId().equals(user.getId()) ){
+            throw new ForBiddenException("you are not authorized to update this travel !!") ;
+        }
         modelMapper.map(travelDto, existingTravel);
-
         if (existingTravel.getEndDate().isBefore(existingTravel.getStartDate())) {
             throw new IllegalArgumentException("End Date cannot be before Start Date");
         }
