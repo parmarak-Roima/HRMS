@@ -2,6 +2,7 @@ package com.HRMS.HRMS.entity.TravelEntities;
 
 import com.HRMS.HRMS.entity.BaseEntity;
 import com.HRMS.HRMS.entity.Employee;
+import com.HRMS.HRMS.entity.Enums.DocType;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -18,8 +19,7 @@ public class TravelDoc extends BaseEntity {
     @JoinColumn(name = "travel_id")
     private Travel travel;
 
-    @ManyToOne
-    @JoinColumn(name = "doc_type_id")
+    @Enumerated(EnumType.STRING)
     private DocType docType;
 
     @ManyToOne
