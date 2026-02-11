@@ -1,7 +1,10 @@
 package com.HRMS.HRMS.service;
 
+import com.HRMS.HRMS.dto.AuthDtos.EmployeeIdEmailDto;
 import com.HRMS.HRMS.dto.EmployeeCreateDTO;
+import com.HRMS.HRMS.dto.EmployeeResponseDTO;
 import com.HRMS.HRMS.entity.Employee;
+import com.HRMS.HRMS.exception.ResourceNotFoundException;
 import com.HRMS.HRMS.repository.EmployeeRepository;
 import com.HRMS.HRMS.repository.RoleRepository;
 import org.modelmapper.ModelMapper;
@@ -9,7 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 public class EmployeeService {
@@ -39,6 +45,32 @@ public class EmployeeService {
         employeeRepository.save(employee);
 
     }
+
+    public List<EmployeeIdEmailDto> allEmployee(){
+        List<Employee> employees = employeeRepository.findAll();
+        List<Employee> employeesRole = employees.stream()
+                .filter(employee ->
+                        employee.getRole().getRole().equals("EMPLOYEE")
+                                || employee.getRole().getRole().equals("MANAGER") ).toList();
+        return employeesRole.stream().map(
+                employee -> {return new EmployeeIdEmailDto( employee.getId(),employee.getEmail() );}
+        ).toList();
+    }
+
+    public EmployeeResponseDTO getEmployee(Long id){
+       Employee employee = employeeRepository.findById(id)
+               .orElseThrow(() -> new ResourceNotFoundException("employee not found !!"));
+        EmployeeResponseDTO employeeResponseDTO = modelMapper.map(employee,EmployeeResponseDTO.class);
+        if (employee.getRole() != null) {
+            employeeResponseDTO.setRole(employee.getRole().getRole());
+        }
+        if (employee.getManager() != null) {
+            employeeResponseDTO.setManagerId(employee.getManager().getId());
+            employeeResponseDTO.setMangerName(employee.getManager().getName());
+        }
+        return employeeResponseDTO;
+    }
+
     public Optional<Employee> findByEmail(String email){
         return employeeRepository.findByEmail(email);
     }

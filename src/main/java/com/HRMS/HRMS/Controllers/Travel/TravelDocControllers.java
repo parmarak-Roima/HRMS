@@ -28,7 +28,6 @@ public class TravelDocControllers {
         this.travelDocService = travelDocService;
     }
 
-    //hr and employee for that travel
     @PostMapping(consumes = "multipart/form-data")
     public ResponseEntity<ApiResponse<TravelDocResponseDto>> createTravelDoc(@ModelAttribute @Valid TravelDocCreateDto travelDocCreateDto){
         CustomUserPrincipal user = (CustomUserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -38,7 +37,7 @@ public class TravelDocControllers {
                 HttpStatus.CREATED
         );
     }
-    //hr only for that travel
+
     @GetMapping("/{travelId}/all")
     @PreAuthorize("hasRole('HR') or hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<TravelDocResponseDto>>> getAllDocs(@PathVariable Long travelId) {
@@ -55,14 +54,12 @@ public class TravelDocControllers {
         return ResponseEntity.ok(new ApiResponse<>("Fetched employee documents", docs));
     }
 
-    //employee for that travel
     @GetMapping("/{travelId}/general")
     public ResponseEntity<ApiResponse<List<TravelDocResponseDto>>> getGeneralDocs(@PathVariable Long travelId) {
         List<TravelDocResponseDto> docs = travelDocService.getGeneralDocs(travelId);
         return ResponseEntity.ok(new ApiResponse<>("Fetched general documents", docs));
     }
 
-   //user who uploaded it
     @PatchMapping(value = "/{docId}", consumes = "multipart/form-data")
     public ResponseEntity<ApiResponse<TravelDocResponseDto>> updateDocument(
             @PathVariable Long docId,
@@ -72,7 +69,6 @@ public class TravelDocControllers {
         return ResponseEntity.ok(new ApiResponse<>("Document file updated successfully", response));
     }
 
-    //only user who uploaded it
     @DeleteMapping("/{docId}")
     public ResponseEntity<ApiResponse<Void>> deleteDocument(@PathVariable Long docId) {
         travelDocService.deleteDocument(docId);

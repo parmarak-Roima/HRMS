@@ -1,5 +1,6 @@
 package com.HRMS.HRMS.service.Travel;
 
+import com.HRMS.HRMS.dto.AuthDtos.EmployeeIdEmailDto;
 import com.HRMS.HRMS.dto.CustomUserPrincipal;
 import com.HRMS.HRMS.dto.TravelDtos.CreateTravelDto;
 import com.HRMS.HRMS.dto.TravelDtos.ShowTravelDto;
@@ -20,6 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 public class TravelService {
@@ -84,26 +87,25 @@ public class TravelService {
                         dto.setEmployeeIdsToAssign(new ArrayList<>());
                     }
                     travel.getTravelAssignments().forEach(assignment ->
-                            dto.getEmployeeIdsToAssign().add(assignment.getEmployee().getId())
+                            dto.getEmployeeIdsToAssign().add( new EmployeeIdEmailDto( assignment.getEmployee().getId(),assignment.getEmployee().getEmail()))
                     );
                     dto.setCreated_by_id(travel.getCreatedBy().getId());
                     return dto;
                 })
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     public ShowTravelDto getTravelById(Long id,CustomUserPrincipal user) {
         //find travel by id
         Travel travel = travelRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Travel Plan not found with ID: " + id));
-        //check if this travel is created by hr or not
-        if( user.getRole().equals("HR") && !travel.getCreatedBy().getId().equals(user.getId()) ){
-            throw new ForBiddenException("you are not authorized to get this travel !!") ;
-        }
-        //check if this employee assigned to travel or not
-        List<Long> assignmentIds = travel.getTravelAssignments()
+        //validate users
+        boolean authorized = false;
+        List<Long> assignmentEmployeeIds = travel.getTravelAssignments()
                 .stream()
-                .map(TravelAssignment::getId)
+                .map(TravelAssignment -> {
+                    return TravelAssignment.getEmployee().getId();
+                })
                 .toList();
         List<Long> assignmentManagerIds = travel.getTravelAssignments()
                 .stream()
@@ -114,9 +116,22 @@ public class TravelService {
                     return null;
                 }) .filter(Objects::nonNull)
                 .toList();
-        if(  !assignmentIds.contains(user.getId()) && !assignmentManagerIds.contains(user.getId()) ){
-            throw new ForBiddenException("you are not authorized to see this travel !!");
+        switch (user.getRole()) {
+            case "HR" -> {
+                authorized = travel.getCreatedBy().getId().equals(user.getId());
+            }
+            case "EMPLOYEE" -> {
+                authorized = assignmentEmployeeIds.contains(user.getId());
+            }
+            case "MANAGER" -> {
+                authorized = assignmentManagerIds.contains(user.getId());
+            }
+            default -> authorized = false; // No access for other roles
         }
+        if (!authorized) {
+            throw new ForBiddenException("You are not authorized to see this travel!");
+        }
+        //return data
         ShowTravelDto travelDto =  modelMapper.map(travel, ShowTravelDto.class);
 
         if (travelDto.getEmployeeIdsToAssign() == null) {
@@ -124,10 +139,10 @@ public class TravelService {
         }
 
         travel.getTravelAssignments().forEach(assignment ->
-                travelDto.getEmployeeIdsToAssign().add(assignment.getEmployee().getId())
+                travelDto.getEmployeeIdsToAssign().add( new EmployeeIdEmailDto( assignment.getEmployee().getId(),assignment.getEmployee().getEmail()))
         );
         travelDto.setCreated_by_id(travel.getCreatedBy().getId());
-    return travelDto;
+        return travelDto;
     }
 
     @Transactional
@@ -158,12 +173,12 @@ public class TravelService {
                         dto.setEmployeeIdsToAssign(new ArrayList<>());
                     }
                     travel.getTravelAssignments().forEach(assignment ->
-                            dto.getEmployeeIdsToAssign().add(assignment.getEmployee().getId())
+                            dto.getEmployeeIdsToAssign().add( new EmployeeIdEmailDto( assignment.getEmployee().getId(),assignment.getEmployee().getEmail()))
                     );
                     dto.setCreated_by_id(travel.getCreatedBy().getId());
                     return dto;
                 })
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 }
 

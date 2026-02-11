@@ -1,10 +1,8 @@
 package com.HRMS.HRMS.dto.TravelDtos;
 
+import com.HRMS.HRMS.dto.AuthDtos.EmployeeIdEmailDto;
 import com.HRMS.HRMS.entity.Employee;
 import com.HRMS.HRMS.entity.Enums.TravelStatus;
-import jakarta.validation.constraints.FutureOrPresent;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import java.time.LocalDate;
 import java.util.List;
@@ -19,7 +17,7 @@ public class ShowTravelDto {
     private LocalDate endDate;
     private TravelStatus status = TravelStatus.SCHEDULED; // Optional for Create (Defaults to SCHEDULED)
     private String requiredDocs;
-    private List<Long> employeeIdsToAssign;
+    private List<EmployeeIdEmailDto> employeeIdsToAssign;
 }
 
 

@@ -15,4 +15,7 @@ public class ExpenseType extends BaseEntity {
     private Long id;
 
     private String type;
+
+    private Long dailyLimit;
+
 }

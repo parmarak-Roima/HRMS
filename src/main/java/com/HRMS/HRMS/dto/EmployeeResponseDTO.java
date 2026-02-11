@@ -15,8 +15,9 @@ public class EmployeeResponseDTO {
     private Designations designation;
     private String email;
     private String profileUrl;
-    private EmployeeRole role;
+    private String role;
     private LocalDate birthdate;
     private LocalDate joiningDate;
     private Long managerId;
+    private String mangerName;
 }

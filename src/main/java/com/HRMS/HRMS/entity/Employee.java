@@ -6,6 +6,7 @@ import com.HRMS.HRMS.entity.TravelEntities.ExpenseType;
 import com.HRMS.HRMS.entity.TravelEntities.Travel;
 import com.HRMS.HRMS.entity.TravelEntities.TravelAssignment;
 import jakarta.persistence.*;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -18,6 +19,7 @@ import java.util.List;
 @Table(name = "employees")
 @Getter
 @Setter
+@Data
 @ToString(exclude = {"manager", "subordinates"})
 public class Employee {
 
@@ -39,7 +41,6 @@ public class Employee {
 
     @Column(nullable = false)
     private String passwordHash;
-
 
     @ManyToOne
     @JoinColumn(name = "role_id")

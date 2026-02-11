@@ -127,7 +127,6 @@ public class TravelDocService {
         travelDocRepository.deleteById(docId);
     }
 
-
     private TravelDocResponseDto mapToResponse(TravelDoc travelDoc) {
         TravelDocResponseDto dto = modelMapper.map(travelDoc, TravelDocResponseDto.class);
         dto.setTravelId(travelDoc.getTravel().getId());

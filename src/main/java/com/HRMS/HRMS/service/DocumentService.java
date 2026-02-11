@@ -52,7 +52,6 @@ public class DocumentService {
 
             Map uploadResult = cloudinary.uploader().upload(file.getBytes(), params);
 
-            // 5. Return URL
             return (String) uploadResult.get("secure_url");
 
         } catch (IOException e) {

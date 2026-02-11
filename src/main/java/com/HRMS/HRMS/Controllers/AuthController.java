@@ -1,14 +1,23 @@
 package com.HRMS.HRMS.Controllers;
 
+import com.HRMS.HRMS.dto.ApiResponse;
 import com.HRMS.HRMS.dto.AuthDtos.AuthResponse;
+import com.HRMS.HRMS.dto.AuthDtos.EmployeeIdEmailDto;
 import com.HRMS.HRMS.dto.AuthDtos.LoginRequest;
+import com.HRMS.HRMS.dto.CustomUserPrincipal;
 import com.HRMS.HRMS.dto.EmployeeCreateDTO;
+import com.HRMS.HRMS.dto.EmployeeResponseDTO;
 import com.HRMS.HRMS.entity.Employee;
+import com.HRMS.HRMS.exception.BadRequestException;
 import com.HRMS.HRMS.repository.RoleRepository;
 import com.HRMS.HRMS.service.EmployeeService;
 import com.HRMS.HRMS.utils.JwtUtils;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,12 +27,13 @@ import org.springframework.security.core.Authentication;
 
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
 
     private final EmployeeService employeeService;
-
 
     private final JwtUtils jwtUtils;
 
@@ -53,7 +63,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody @Valid LoginRequest request) {
+    public ResponseEntity<AuthResponse> login(@RequestBody @Valid LoginRequest request) {
 
             //checks email & password
             Authentication authentication = authenticationManager.authenticate(
@@ -70,9 +80,32 @@ public class AuthController {
                         employee.getId(),
                         employee.getName()
                 );
-                return ResponseEntity.ok(new AuthResponse(token));
+                CustomUserPrincipal user = new CustomUserPrincipal(employee.getId(), employee.getEmail(),employee.getName(),employee.getRole().getRole());
+                return ResponseEntity.ok( (new AuthResponse(token,user)));
             } else {
-                return ResponseEntity.status(401).body("Invalid credentials");
+                throw new BadCredentialsException("Invalid credentials");
             }
+    }
+    @GetMapping("/employee/{id}")
+    public ResponseEntity<ApiResponse<EmployeeResponseDTO>> getEmployeeById(@PathVariable long id){
+        return new ResponseEntity<>(
+                new ApiResponse<>("user data",employeeService.getEmployee(id) ),
+                HttpStatus.OK
+        );
+    }
+    @GetMapping
+    public ResponseEntity<ApiResponse<CustomUserPrincipal>> profile() {
+        CustomUserPrincipal user = (CustomUserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return new ResponseEntity<>(
+                new ApiResponse<>("user data",user ),
+                HttpStatus.OK
+        );
+    }
+    @GetMapping("/employee")
+    public ResponseEntity<ApiResponse<List<EmployeeIdEmailDto>>> allEmployee() {
+        return new ResponseEntity<>(
+                new ApiResponse<>("user data", employeeService.allEmployee()),
+                HttpStatus.OK
+        );
     }
 }

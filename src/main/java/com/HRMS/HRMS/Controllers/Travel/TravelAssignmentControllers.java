@@ -26,7 +26,6 @@ public class TravelAssignmentControllers {
         this.travelAssignmentService = travelAssignmentService;
     }
 
-    //only hr assigned to that travel
     @PostMapping
     @PreAuthorize("hasRole('HR')")
     public ResponseEntity<ApiResponse<TravelAssignmentResponseDto>> assignEmployee(
@@ -36,7 +35,6 @@ public class TravelAssignmentControllers {
         return ResponseEntity.ok(new ApiResponse<>("Employee assigned successfully", response));
     }
 
-    //only hr for that travel
     @PatchMapping("/{id}")
     @PreAuthorize("hasRole('HR')")
     public ResponseEntity<ApiResponse<TravelAssignmentResponseDto>> updateAssignment(
@@ -47,7 +45,6 @@ public class TravelAssignmentControllers {
         return ResponseEntity.ok(new ApiResponse<>("Assignment updated successfully", response));
     }
 
-    //only employee and manager of them
     @GetMapping("/employee/{empId}")
     public ResponseEntity<ApiResponse<List<TravelAssignmentResponseDto>>> getEmployeeTravels(
             @PathVariable Long empId) {
@@ -56,7 +53,6 @@ public class TravelAssignmentControllers {
         return ResponseEntity.ok(new ApiResponse<>("Fetched employee travels", list));
     }
 
-    //only manager
     @GetMapping("/manager/{managerId}")
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<ApiResponse<List<TravelAssignmentResponseDto>>> getTeamTravels(

@@ -64,7 +64,6 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    //UserDetailsService: Loads user from DB
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> employeeRepository.findByEmail(username)

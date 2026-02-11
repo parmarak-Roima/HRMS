@@ -19,7 +19,7 @@ import java.util.List;
 @RequestMapping("/travel")
 public class TravelControllers {
 
-    TravelService travelService ;
+    private final TravelService travelService ;
 
     @Autowired
     public TravelControllers(TravelService travelService){
@@ -36,7 +36,7 @@ public class TravelControllers {
                 HttpStatus.CREATED
         );
     }
-    //only admin
+
     @GetMapping("all")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<ShowTravelDto>>> getAllTravel() {
@@ -46,7 +46,6 @@ public class TravelControllers {
         );
     }
 
-    //only hr and empolyee assigned to that travel
     @GetMapping("{id}")
     public ResponseEntity<ApiResponse<ShowTravelDto>> getTravelById(@PathVariable Long id) {
         CustomUserPrincipal user = (CustomUserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -56,7 +55,6 @@ public class TravelControllers {
         );
     }
 
-    //only hr
     @PatchMapping("{id}")
     @PreAuthorize("hasRole('HR')")
     public ResponseEntity<ApiResponse<ShowTravelDto>> updateTravel(@PathVariable Long id , @RequestBody CreateTravelDto createTravelDto ) {
@@ -67,7 +65,6 @@ public class TravelControllers {
         );
     }
 
-    //only hr for that travel
     @GetMapping("HR")
     @PreAuthorize("hasRole('HR')")
     public ResponseEntity<ApiResponse<List<ShowTravelDto>>> getTravelForHr() {
