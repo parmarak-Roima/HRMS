@@ -2,26 +2,31 @@ import { loginUser } from "../../Services/authService";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { useForm } from "react-hook-form";
-
+import { useNavigate } from "react-router-dom";
+import { useAuthUserContext } from "../../Contexts/AuthUserContext";
 export default function Login() {
      const {
     register, 
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting ,errors },
   } = useForm();
-  
-  
+    const navigate = useNavigate();
+    const {authUser,setAuthUser} = useAuthUserContext();
   const handleLogin = async (data) => {
     try {
     const response = await loginUser(data);
     localStorage.setItem("token", response.token);
+    console.log(response.user)
+    setAuthUser(response.user);
+    toast.success("logged in successfully !!!")
+    navigate(`/profile/${response.user.id}`);
     } catch (err) {
         toast.error(err?.data?.message)
         console.log(err);
     } 
   };
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4">
+    <div className="flex min-h-screen items-start justify-center bg-gray-100 p-4">
       <div className="w-full max-w-sm bg-white rounded-2xl shadow-lg p-6">
         <h2 className="text-2xl font-semibold text-center mb-6 text-gray-800">
           Login
@@ -60,7 +65,6 @@ export default function Login() {
             <p className="text-red-500 text-sm">{errors.password.message}</p>
           )}
         </div>
-
         <button
           type="submit"
           disabled={isSubmitting}
