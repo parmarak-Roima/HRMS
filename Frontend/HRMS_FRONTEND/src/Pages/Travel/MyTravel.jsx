@@ -10,6 +10,7 @@ const MyTravels = () => {
   const [loading, setLoading] = useState(true);
   const { authUser, setAuthUser } = useAuthUserContext();
   const  navigate = useNavigate();
+  
   useEffect(() => {
     const setEmployeeTravel = async () => {
       try {
@@ -43,7 +44,7 @@ const MyTravels = () => {
                 {authUser.role == "MANAGER" &&
                   <button
                     onClick={() => {navigate(`/travel/manager/${authUser.id}`)}}
-                    className="w-[100px] bg-black text-white font-medium py-2  px-3 rounded-2xl "
+                    className="w-25 bg-black text-white font-medium py-2  px-3 rounded-2xl "
                   >
                     Team Travel
                   </button>
@@ -57,7 +58,7 @@ const MyTravels = () => {
                   onClick={() => {
                     navigate("/travel/create")
                   }}
-                  className="w-[200px] bg-black text-white font-medium py-2  px-3 rounded-2xl "
+                  className="w-50 bg-black text-white font-medium py-2  px-3 rounded-2xl "
                 >
                   Create travel
                 </button>

@@ -2,7 +2,7 @@ import React from "react";
 import { getTeamTravel } from "../../Services/TravelAssignment";
 import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
-import TravelDocEmployee from "../../Componenets/TravelDocEmployee";
+import TravelDocEmployee from "./TravelDocEmployee";
 import { useAuthUserContext } from "../../Contexts/AuthUserContext";
 function TeamTravel() {
   const { managerId } = useParams();
@@ -75,6 +75,14 @@ function TeamTravel() {
                     className="w-full bg-black text-white font-medium py-2 px-3 mt-4 rounded "
                   >
                     View-Documents
+                  </button>
+                  <button
+                    onClick={() => {
+                        navigate(`/travel-expense/${travel.travelId}/${travel.employeeId}`)
+                    }}
+                    className="w-full bg-black text-white font-medium py-2 px-3 mt-4 rounded "
+                  >
+                    View-Expenses
                   </button>
                 </div>
               </div>

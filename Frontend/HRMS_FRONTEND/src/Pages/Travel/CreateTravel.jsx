@@ -18,11 +18,13 @@ import { zodResolver } from "@hookform/resolvers/zod/src/zod.js";
 import { useEffect, useState } from "react";
 import { fetchAllEmployee } from "../../Services/authService";
 import { useAuthUserContext } from "../../Contexts/AuthUserContext";
+import { useNavigate } from "react-router-dom";
 
 function CreateTravel() {
-    const { authUser, setAuthUser } = useAuthUserContext();
+  const { authUser, setAuthUser } = useAuthUserContext();
   const [employees, setEmployees] = useState([]);
   const [selectedEmployeeIds, setSelectedEmployeeIds] = useState([]);
+  const navigate = useNavigate();
   useEffect(() => {
     const getAllEmployee = async () => {
       try {
@@ -46,11 +48,13 @@ function CreateTravel() {
     },
     resolver: zodResolver(createTravelSchema),
   });
+
   const toggleEmployee = (id) => {
     setSelectedEmployeeIds((prev) =>
       prev.includes(id) ? prev.filter((empId) => empId !== id) : [...prev, id],
     );
   };
+
   const onSubmit = async (values) => {
     try {
       const payload = {
@@ -60,12 +64,15 @@ function CreateTravel() {
       const res = await createTravel(payload);
       toast.success("Travel created successfully!");
       form.reset();
+      navigate("/travel")
     } catch (err) {
       console.error(err);
       toast.error("Error creating travel");
     }
   };
+
   if( authUser.role != "HR" )return <p>you can not access this page !!</p>
+
   return (
     <div className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow">
       <h2 className="text-2xl font-bold mb-4">Create Travel</h2>

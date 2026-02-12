@@ -6,15 +6,15 @@ import { toast } from "react-toastify/unstyled";
 import { useAuthUserContext } from '../Contexts/AuthUserContext';
 
 function TravelAssignments({travelId}) {
-      const { authUser, setAuthUser } = useAuthUserContext();
+     const { authUser, setAuthUser } = useAuthUserContext();
     
      const [travel, setTravel] = useState([]);
+
       const navigate =  useNavigate();
       useEffect(() => {
         const setTravelById = async () => {
           try {
             const response = await fetchTravelById(travelId);
-            console.log(response);
             setTravel(response.data);
           } catch (err) {
             toast.error(err?.data?.message);
@@ -22,6 +22,7 @@ function TravelAssignments({travelId}) {
         };
         setTravelById();
       }, [travelId]);
+
   return (
      <div className="w-full bg-gray-100 p-6">
         <div className="max-w-4xl mx-auto space-y-6">
@@ -42,7 +43,7 @@ function TravelAssignments({travelId}) {
                     </p>
                   </div>
                   <div className="flex flex-col justify-center">
-                    {authUser.role == "HR" &&
+                    {(authUser.role == "HR" || authUser.role == "EMPLOYEE" && authUser.id == employee?.id )&&
                     <div>
                     <button
                       onClick={() => {
@@ -54,7 +55,7 @@ function TravelAssignments({travelId}) {
                     </button>
                     <button
                       onClick={() => {
-                        navigate(`/travelDoc/${travel?.id}/${employee.id}`)
+                        navigate(`/travel-expense/${travel?.id}/${employee.id}`)
                       }}
                       className="w-full bg-black text-white font-medium py-2  mt-4 rounded "
                     >

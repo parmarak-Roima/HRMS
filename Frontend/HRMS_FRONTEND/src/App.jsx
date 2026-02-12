@@ -11,7 +11,10 @@ import ShowTravelDetails from './Pages/Travel/ShowTravelDetails'
 import MyTravels from './Pages/Travel/MyTravel'
 import UploadDocument from './Pages/Travel/UploadDocument'
 import TeamTravel from './Pages/Travel/TeamTravel'
-import TravelDocEmployee from './Componenets/TravelDocEmployee'
+import TravelDocEmployee from './Pages/Travel/TravelDocEmployee'
+import CreateExpense from './Pages/Travel/CreateExpense'
+import ShowTravelExpense from './Pages/Travel/ShowTravelExpense'
+import NotificationPage from './Pages/Travel/NotificationPage'
 function App() {
 
   return (
@@ -71,14 +74,31 @@ function App() {
                 <TeamTravel />
               }
             />
-              <Route
+            <Route
               path="/travelDoc/:travelId/:empId"
               element={
                 <TravelDocEmployee />
               }
             />
+            <Route
+              path="/travel-expense/:travelAssignmentId/Create"
+              element={
+                <CreateExpense />
+              }
+            />
+            <Route
+              path="/travel-expense/:travelId/:empId"
+              element={
+                <ShowTravelExpense />
+              }
+            />
+            <Route
+              path="/notification/:userId"
+              element={
+                <NotificationPage />
+              }
+            />
            </Route>
-          
        </Routes>
     </>
     

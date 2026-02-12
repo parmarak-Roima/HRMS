@@ -8,12 +8,10 @@ export default function Navbar() {
   const {authUser,setAuthUser} = useAuthUserContext();
   const Navigate = useNavigate();
   return (
-    <nav className="fixed top-0 left-0 w-full z-50  bg-gray-800 text-white px-6 py-3 flex items-center justify-between shadow mb-[30px]">
+    <nav className="fixed top-0 left-0 w-full z-50  bg-gray-800 text-white px-6 py-3 flex items-center justify-between shadow mb-7.5">
     
       <div className="text-xl font-bold">HRMS</div>
-      {authUser && (
-
-    
+      {authUser && (    
       <NavigationMenu>
         <NavigationMenuList className="flex space-x-4">
           <NavigationMenuItem>
@@ -83,7 +81,7 @@ export default function Navbar() {
            <NavigationMenuItem>
             <NavigationMenuLink asChild>
               <NavLink
-                to="/game-booking"
+                to="/Achivements"
                 className={({ isActive }) =>
                   `px-3 py-2 rounded-md transition-colors ${
                     isActive
@@ -99,7 +97,7 @@ export default function Navbar() {
           <NavigationMenuItem>
             <NavigationMenuLink asChild>
               <NavLink
-                to={`/profile/${authUser?.id}`}
+                to={`/notification/${authUser.id}`}
                 className={({ isActive }) =>
                   `px-3 py-2 rounded-md transition-colors ${
                     isActive
@@ -115,7 +113,7 @@ export default function Navbar() {
         </NavigationMenuList>
       </NavigationMenu>
         )}
-      <div className="space-x-2">
+      <div className="space-x-2 flex ">
         {!authUser ? (
           <>
             <Button
@@ -138,7 +136,9 @@ export default function Navbar() {
             Logout
           </Button>
         )}
-        <p>{authUser?.role}</p>
+        <p className="flex justify-center px-2.5 py-2 bg-white text-black rounded-full">
+          {authUser?.role}
+        </p>
       </div>
     </nav>
   );

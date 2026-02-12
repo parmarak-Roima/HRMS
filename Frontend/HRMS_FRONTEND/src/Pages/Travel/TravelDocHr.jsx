@@ -29,10 +29,10 @@ function TravelDocHr({ travelId, empId }) {
                 Travel Documents
               </h2>
                 <div className="flex justify-end mb-3">
-                    {authUser.role == "EMPLOYEE" || authUser.role == "HR" && 
+                    {(authUser.role == "EMPLOYEE" || authUser.role == "HR" )&& 
                   <button
                     onClick={() => {navigate(`/travel/uploadDocs/${empId}/${travelId}`)}}
-                    className="w-[100px] bg-black text-white font-medium py-2  px-3 rounded-2xl "
+                    className="w-25 bg-black text-white font-medium py-2  px-3 rounded-2xl "
                   >
                     upload document
                   </button>

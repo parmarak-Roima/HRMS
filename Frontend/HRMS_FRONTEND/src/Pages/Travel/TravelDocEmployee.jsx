@@ -1,12 +1,13 @@
 import { useState, useEffect, use } from "react";
-import { fetchAllDocs } from "../Services/TravelDocService";
-import { useAuthUserContext } from "../Contexts/AuthUserContext";
+import { fetchAllDocs } from "../../Services/TravelDocService";
+import { useAuthUserContext } from "../../Contexts/AuthUserContext";
 import { useNavigate, useParams } from "react-router-dom";
 function TravelDocEmployee() {
     const {travelId,empId} = useParams();
   const [documents, setDocuments] = useState([]);
   const { authUser, setAuthUser } = useAuthUserContext();
   const navigate = useNavigate();
+  
   useEffect(() => {
     const getAllDocs = async () => {
       try {
@@ -19,6 +20,7 @@ function TravelDocEmployee() {
     };
     getAllDocs();
   }, [travelId, empId]);
+  
   if( documents.length == 0 ) return  <p  className="text-2xl text-center font-semibold mb-4">No document uploaded yet !!</p>
   return (
     <>
@@ -30,10 +32,10 @@ function TravelDocEmployee() {
                 Travel Documents
               </h2>
                 <div className="flex justify-end mb-3">
-                    {authUser.role == "EMPLOYEE" || authUser.role == "HR" && 
+                    {(authUser.role == "EMPLOYEE" || authUser.role == "HR") && 
                   <button
                     onClick={() => {navigate(`/travel/uploadDocs/${empId}/${travelId}`)}}
-                    className="w-[100px] bg-black text-white font-medium py-2  px-3 rounded-2xl "
+                    className="w-25 bg-black text-white font-medium py-2  px-3 rounded-2xl "
                   >
                     upload document
                   </button>

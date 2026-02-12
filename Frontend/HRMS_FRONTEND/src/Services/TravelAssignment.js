@@ -7,3 +7,6 @@ export const fetchEmployeeTravel = (empId) => {
 export const getTeamTravel = (managerId) => {
     return apiClient.get(`${CONTROLLER}/manager/${managerId}`)
 }
+export const getTravelAssignmentId = (travelId,empId) => {
+    return apiClient.get(`${CONTROLLER}/travelAssignmentId/${travelId}/${empId}`)
+}

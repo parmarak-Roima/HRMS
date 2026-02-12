@@ -6,9 +6,12 @@ export const fetchAllDocs = (travelId , empId) => {
 }
 
 export const uploadTravelDocument = (data) => {
-    return apiClient.post(`${CONTROLLER}`,data,
-       { headers: {
-      "Content-Type": "multipart/form-data",
-    },}
+    return apiClient.post(`${CONTROLLER}`,
+      data,
+      { 
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
     )
 }
