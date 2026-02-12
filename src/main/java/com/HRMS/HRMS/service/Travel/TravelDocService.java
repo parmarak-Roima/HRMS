@@ -15,6 +15,7 @@ import com.HRMS.HRMS.repository.TravelRepositories.TravelAssignmentRepo;
 import com.HRMS.HRMS.repository.TravelRepositories.TravelDocRepository;
 import com.HRMS.HRMS.repository.TravelRepositories.TravelRepository;
 import com.HRMS.HRMS.service.DocumentService;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class TravelDocService {
 
     private final TravelDocRepository travelDocRepository;
@@ -81,6 +83,17 @@ public class TravelDocService {
         doc.setFileUrl(fileUrl);
 
         TravelDoc savedDoc = travelDocRepository.save(doc);
+
+        //logging
+        if( travelDocCreateDto.getOwnerId() != null ) {
+            log.info(
+                   travelDocCreateDto.getDocTypeStr() +" uploaded by hr (" + user.getId() + ")" + "for" + travelDocCreateDto.getOwnerId()
+            );
+        }else{
+            log.info(
+                    travelDocCreateDto.getDocTypeStr()+ " uploaded by hr (" + user.getId() + ")" + "for all assigned employee !!"
+            );
+        }
         return mapToResponse(savedDoc);
     }
 

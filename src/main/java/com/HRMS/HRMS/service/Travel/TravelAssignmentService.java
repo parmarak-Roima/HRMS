@@ -13,6 +13,7 @@ import com.HRMS.HRMS.exception.ResourceNotFoundException;
 import com.HRMS.HRMS.repository.EmployeeRepository;
 import com.HRMS.HRMS.repository.TravelRepositories.TravelAssignmentRepo;
 import com.HRMS.HRMS.repository.TravelRepositories.TravelRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@Slf4j
 public class TravelAssignmentService {
 
      private final TravelAssignmentRepo assignmentRepo;
@@ -43,6 +45,7 @@ public class TravelAssignmentService {
         this.modelMapper = modelMapper;
         this.employeeRepo = employeeRepository;
     }
+
 
     public TravelAssignmentResponseDto createAssignment(TravelAssignmentCreateDto dto, CustomUserPrincipal user) {
 
@@ -68,6 +71,7 @@ public class TravelAssignmentService {
         assignment.setStatus(TravelStatus.SCHEDULED);
 
         TravelAssignment saved = assignmentRepo.save(assignment);
+        log.info("Travel"+"("+dto.getTravelId()+")" +" assigned for "+dto.getEmployeeId());
         return mapToResponse(saved);
     }
 
@@ -114,6 +118,10 @@ public class TravelAssignmentService {
         dto.setEmployeeId(entity.getEmployee().getId());
         dto.setEmployeeName(entity.getEmployee().getName());
         return dto;
+    }
+
+    public Long getTravelAssignmentId(Long travelId, Long empId) {
+         return assignmentRepo.findByTravelIdAndEmployeeId(travelId,empId).getId();
     }
 }
 

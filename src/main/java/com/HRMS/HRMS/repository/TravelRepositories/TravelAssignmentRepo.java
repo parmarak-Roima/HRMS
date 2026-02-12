@@ -16,4 +16,6 @@ public interface TravelAssignmentRepo extends JpaRepository<TravelAssignment,Lon
 
     boolean existsByTravelIdAndEmployeeId(Long travelId, Long employeeId);
 
+    @Query("SELECT ta FROM TravelAssignment ta WHERE ta.travel.id = :travelId AND ta.employee.id = :empId")
+    TravelAssignment findByTravelIdAndEmployeeId(Long travelId ,Long empId);
 }

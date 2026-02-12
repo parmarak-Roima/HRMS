@@ -12,8 +12,7 @@ import io.jsonwebtoken.JwtException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.web.client.HttpClientErrorException;
-
+import com.HRMS.HRMS.exception.MissingTokenException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -24,11 +23,14 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     // jwt exceptions
+    @ExceptionHandler(MissingTokenException.class)
+    public ResponseEntity<ErrorResponse> handleMissingToken(MissingTokenException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.UNAUTHORIZED, "Token missing.", request, null);
+    }
     @ExceptionHandler(io.jsonwebtoken.ExpiredJwtException.class)
     public ResponseEntity<ErrorResponse> handleExpiredJwtException(io.jsonwebtoken.ExpiredJwtException ex, HttpServletRequest request) {
         return buildResponse(HttpStatus.UNAUTHORIZED, "Your session has expired. Please login again.", request, null);
     }
-
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleUsernameNotFound(UsernameNotFoundException ex, HttpServletRequest request) {
         return buildResponse(HttpStatus.NOT_FOUND, "User not found: " + ex.getMessage() , request,null);

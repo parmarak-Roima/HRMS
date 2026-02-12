@@ -13,7 +13,9 @@ import com.HRMS.HRMS.exception.ResourceNotFoundException;
 import com.HRMS.HRMS.repository.EmployeeRepository;
 import com.HRMS.HRMS.repository.TravelRepositories.TravelAssignmentRepo;
 import com.HRMS.HRMS.repository.TravelRepositories.TravelRepository;
+import com.HRMS.HRMS.service.NotificationService;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
 import static java.util.stream.Collectors.toList;
 
 @Service
+@Slf4j
 public class TravelService {
 
     private final TravelRepository travelRepository;
@@ -35,15 +38,19 @@ public class TravelService {
 
     private final ModelMapper modelMapper;
 
+    private final NotificationService notificationService;
+
     @Autowired
     public TravelService(TravelRepository travelRepository,
                          EmployeeRepository employeeRepository,
                          TravelAssignmentRepo travelAssignmentRepo,
-                         ModelMapper modelMapper){
+                         ModelMapper modelMapper,
+                         NotificationService notificationService){
         this.travelRepository = travelRepository;
         this.travelAssignmentRepo = travelAssignmentRepo;
         this.employeeRepository = employeeRepository;
         this.modelMapper = modelMapper;
+        this.notificationService = notificationService;
     }
 
     @Transactional
@@ -73,9 +80,19 @@ public class TravelService {
                 assignment.setEndDate(savedTravel.getEndDate());
                 assignment.setStatus(TravelStatus.SCHEDULED);
                 travelAssignmentRepo.save(assignment);
-                /// TODO: emailService.sendTravelAssignedEmail(emp, savedTravel);
+                notificationService.sendNotification(
+                    emp, "you are assigned to travel!!", "travel", user.getId()
+                );
+                //TODO: emailService.sendTravelAssignedEmail(emp, savedTravel);
             }
         }
+        StringBuilder s = new StringBuilder("");
+        for( int i = 0 ; i <  createTravelDto.getEmployeeIdsToAssign().toArray().length ; i++  ){
+            s.append( createTravelDto.getEmployeeIdsToAssign().toArray()[i]);
+        }
+        log.info("trave(id:" + savedTravel.getId() + ") created by hr(email-id):-" + savedTravel.getCreatedBy().getEmail()
+            + " for " + s.toString()
+        );
         return modelMapper.map(savedTravel, CreateTravelDto.class);
     }
 

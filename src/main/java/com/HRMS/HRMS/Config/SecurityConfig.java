@@ -70,7 +70,7 @@ public class SecurityConfig {
                 .map(employee -> org.springframework.security.core.userdetails.User.builder()
                         .username(employee.getEmail())
                         .password(employee.getPasswordHash())
-                        .roles(String.valueOf(employee.getRole())) // Spring automatically adds "ROLE_" prefix here (user.builder.roles)
+                        .roles(String.valueOf(employee.getRole()))
                         .build())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }

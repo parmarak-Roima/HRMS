@@ -61,4 +61,11 @@ public class TravelAssignmentControllers {
         List<TravelAssignmentResponseDto> list = travelAssignmentService.getTeamTravels(managerId,user);
         return ResponseEntity.ok(new ApiResponse<>("Fetched employee travels", list));
     }
+    @GetMapping("/travelAssignmentId/{travelId}/{empId}")
+    public ResponseEntity<ApiResponse<Long>> getTravelAssignmentId(
+            @PathVariable Long travelId , @PathVariable Long empId
+    ){
+        Long travelAssignmentID = travelAssignmentService.getTravelAssignmentId(travelId,empId);
+        return ResponseEntity.ok(new ApiResponse<>("travel assignment id fetched sucessfully",travelAssignmentID));
+    }
 }

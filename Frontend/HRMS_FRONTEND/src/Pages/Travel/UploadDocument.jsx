@@ -1,12 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useAuthUserContext } from "../../Contexts/AuthUserContext";
 import { uploadTravelDocument } from "../../Services/TravelDocService";
 export default function UploadDocument() {
   const { ownerId, travelId } = useParams();
   const { authUser, setAuthUser } = useAuthUserContext();
+  const [isAll, setIsAll] = useState(false);
+  const navigate = useNavigate();
+  const handleChange = (e) => {
+    setIsAll(e.target.checked);
+  };
   const {
     register,
     handleSubmit,
@@ -24,21 +29,22 @@ export default function UploadDocument() {
       const formData = new FormData();
       formData.append("docTypeStr", data.docTypeStr);
       formData.append("file", data.file[0]);
-      if (authUser.role !== "HR") {
+      if (authUser.role !== "HR" || !isAll ) {
         formData.append("ownerId", ownerId);
       }
       formData.append("travelId", travelId);
       await uploadTravelDocument(formData);
       toast.success("Document uploaded successfully!");
       reset();
+      navigate("/travel");
     } catch (err) {
       console.error(err);
       toast.error("Error uploading document");
     }
   };
-  
+
   return (
-    <div className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow mt-[40px]">
+    <div className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow mt-10">
       <h2 className="text-2xl font-bold mb-4">Upload Docuements</h2>
       <form
         onSubmit={handleSubmit(onSubmit)}
@@ -76,12 +82,21 @@ export default function UploadDocument() {
             <p className="text-red-500 text-sm mt-1">{errors.file.message}</p>
           )}
         </div>
+        {authUser.role == "HR" && (
+          <div>
+            <label>
+              <input type="checkbox" checked={isAll} onChange={handleChange} />
+              want to upload for All?
+            </label>
+          </div>
+        )}
+
         <button
           type="submit"
           disabled={isSubmitting}
           className="px-4 py-2 bg-black text-white rounded hover:bg-gray-700"
         >
-          {isSubmitting ?   "Uploading..." : "upload"}
+          {isSubmitting ? "Uploading..." : "upload"}
         </button>
       </form>
     </div>
