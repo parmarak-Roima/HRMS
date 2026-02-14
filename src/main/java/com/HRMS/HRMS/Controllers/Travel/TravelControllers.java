@@ -38,7 +38,7 @@ public class TravelControllers {
     }
 
     @GetMapping("all")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('HR')")
     public ResponseEntity<ApiResponse<List<ShowTravelDto>>> getAllTravel() {
         return new ResponseEntity<>(
                 new ApiResponse<>("all travels", travelService.getAllTravels()),

@@ -14,6 +14,7 @@ import com.HRMS.HRMS.repository.TravelRepositories.TravelAssignmentRepo;
 import com.HRMS.HRMS.repository.TravelRepositories.TravelExpenseRepository;
 import com.HRMS.HRMS.repository.TravelRepositories.TravelRepository;
 import com.HRMS.HRMS.service.DocumentService;
+import com.HRMS.HRMS.service.NotificationService;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,7 @@ public class TravelExpenseService {
      private final ExpenseTypeRepo expenseTypeRepo;
      private final DocumentService documentService; // Cloudinary Service
      private final ModelMapper modelMapper;
+    private final NotificationService notificationService;
 
     @Autowired
     public TravelExpenseService(
@@ -44,13 +46,14 @@ public class TravelExpenseService {
             TravelAssignmentRepo travelAssignmentRepo,
             ExpenseTypeRepo expenseTypeRepo,
             DocumentService documentService,
-            ModelMapper modelMapper
-    ){
+            ModelMapper modelMapper,
+            NotificationService notificationService){
         this.expenseRepo = travelExpenseRepository;
         this.assignmentRepo = travelAssignmentRepo;
         this.expenseTypeRepo = expenseTypeRepo;
         this.documentService = documentService;
         this.modelMapper = modelMapper;
+        this.notificationService = notificationService;
     }
 
     public TravelExpenseResponseDto createExpense(TravelExpenseCreateDto dto , CustomUserPrincipal user) {
@@ -98,6 +101,10 @@ public class TravelExpenseService {
         expense.setProofUrl(proofUrl);
         expense.setStatus(ExpenseStatus.DRAFT);
 
+        //notification
+        notificationService.sendNotification(
+              assignment.getEmployee()   , "you uploaded expense for" +expense.getExpenseType().getType() + "with status" + expense.getStatus() , "travel-assignment", assignment.getId()
+        );
         //logging
         log.info(
                 "Employee" + expense.getTravelAssignment().getEmployee().getId() + " uploaded expense for" + expense.getExpenseType() + "with amount" + expense.getAmount() + "On Date"+expense.getDate()
@@ -122,6 +129,14 @@ public class TravelExpenseService {
             throw new BadRequestException("Cannot edit expense that is Approved.");
         }
         expense.setStatus(ExpenseStatus.SUBMITTED);
+        //notification
+        //for hr
+        notificationService.sendNotification(
+                expense.getTravelAssignment().getTravel().getCreatedBy(),
+                "Employee with email id"+ expense.getTravelAssignment().getEmployee().getEmail() + "submitted expense for travel ("+ expense.getTravelAssignment().getTravel().getId() + ")",
+                "travel-expense",
+                expenseId
+        );
         log.info(
                 "Employee with employee id:" + expense.getTravelAssignment().getEmployee().getId() + "submitted expense with expense id :-"+ expense.getId()
         );
@@ -131,14 +146,20 @@ public class TravelExpenseService {
     public TravelExpenseResponseDto updateExpenseHR(Long expenseId, TravelExpenseUpdateDto dto,CustomUserPrincipal user) {
         TravelExpense expense = expenseRepo.findById(expenseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Expense not found"));
-        if( !expense.getTravelAssignment().getTravel().getCreatedBy().getId().equals(user.getId())){
-            throw new ForBiddenException("you can approve this expense");
-        }
+//        if( !expense.getTravelAssignment().getTravel().getCreatedBy().getId().equals(user.getId())){
+//            throw new ForBiddenException("you can approve this expense");
+//        }
         if (dto.getStatus() == ExpenseStatus.REJECTED && (dto.getRemarks() == null || dto.getRemarks().isEmpty())) {
             throw new BadRequestException("Remarks are mandatory when rejecting.");
         }
         expense.setStatus(dto.getStatus());
         expense.setRemarks(dto.getRemarks());
+
+        //notification
+        //for employee
+        notificationService.sendNotification(
+                expense.getTravelAssignment().getEmployee() , "HR Changed status of expense" + expenseId +  "from SUBMITTED to" + expense.getStatus() , "travel-expense", expense.getId()
+        );
         log.info(
                 "Employee with employee id:" + expense.getTravelAssignment().getEmployee().getId() + " got changed status to" +  expense.getStatus() + "with expense id :-"+ expense.getId()
         );

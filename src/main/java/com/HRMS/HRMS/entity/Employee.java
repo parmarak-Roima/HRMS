@@ -20,7 +20,7 @@ import java.util.List;
 @Getter
 @Setter
 @Data
-@ToString(exclude = {"manager", "subordinates"})
+//@ToString(exclude = {"manager", "subordinates"})
 public class Employee {
 
     @Id

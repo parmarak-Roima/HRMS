@@ -4,13 +4,15 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import TravelDocEmployee from "./TravelDocEmployee";
 import { useAuthUserContext } from "../../Contexts/AuthUserContext";
+import { handleGlobalError } from "../../Services/GlobalExceptionService";
 function TeamTravel() {
   const { managerId } = useParams();
   const [empId, setEmpId] = useState(0);
   const [travelId, setTravelId] = useState(0);
   const [travels, setTravels] = useState([]);
-    const { authUser, setAuthUser } = useAuthUserContext();
+  const { authUser, setAuthUser } = useAuthUserContext();
   const navigate = useNavigate();
+
   useEffect(() => {
     const fetchTeamTravel = async () => {
       try {
@@ -18,12 +20,14 @@ function TeamTravel() {
         console.log(response);
         setTravels(response.data);
       } catch (err) {
-        toast.error(err?.data?.message);
+        handleGlobalError(err)
       }
     };
     fetchTeamTravel();
   }, [managerId]);
+
   if(authUser.role !== "MANAGER") return <p>you cannot access this page</p>
+
   if (!travels || travels.length === 0) {
     return <p className="text-gray-500">No travel records found.</p>;
   }

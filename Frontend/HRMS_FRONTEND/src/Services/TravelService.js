@@ -5,8 +5,8 @@ export const fetchTravelById = (id) => {
   return apiClient.get(`${CONTROLLER}/${id}`);
 }
 
-export const fetchHrTravel = () => {
-    return apiClient.get(`${CONTROLLER}/HR`)
+export const fetchAllTravel = () => {
+    return apiClient.get(`${CONTROLLER}/all`)
 }
 export const createTravel = (payload) => {
     return apiClient.post(`${CONTROLLER}`,payload,

@@ -2,6 +2,7 @@ import { useState, useEffect, use } from "react";
 import {fetchAllDocs} from "../../Services/TravelDocService";
 import { useAuthUserContext } from "../../Contexts/AuthUserContext";
 import { useNavigate } from "react-router-dom";
+import { handleGlobalError } from "../../Services/GlobalExceptionService";
 function TravelDocHr({ travelId, empId }) {
   const [documents, setDocuments] = useState([]);
   const { authUser, setAuthUser } = useAuthUserContext();
@@ -13,7 +14,7 @@ function TravelDocHr({ travelId, empId }) {
         console.log(response);
         setDocuments(response.data);
       } catch (e) {
-        toast.error(err?.data?.message);
+        handleGlobalError(e)
       }
     };
     getAllDocs();

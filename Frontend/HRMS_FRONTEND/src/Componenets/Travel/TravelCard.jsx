@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useAuthUserContext } from "../Contexts/AuthUserContext";
+import { useAuthUserContext } from "../../Contexts/AuthUserContext";
 
 const TravelCard = ({ assignment }) => {
     const navigate =  useNavigate();

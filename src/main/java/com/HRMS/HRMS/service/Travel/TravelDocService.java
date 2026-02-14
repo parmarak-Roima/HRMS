@@ -15,6 +15,7 @@ import com.HRMS.HRMS.repository.TravelRepositories.TravelAssignmentRepo;
 import com.HRMS.HRMS.repository.TravelRepositories.TravelDocRepository;
 import com.HRMS.HRMS.repository.TravelRepositories.TravelRepository;
 import com.HRMS.HRMS.service.DocumentService;
+import com.HRMS.HRMS.service.NotificationService;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,7 @@ public class TravelDocService {
     private final DocumentService documentService; // Your Cloudinary Service
     private final ModelMapper modelMapper;
     private final TravelAssignmentRepo travelAssignmentRepo;
+    private final NotificationService notificationService;
 
     @Autowired
     public TravelDocService(
@@ -42,13 +44,14 @@ public class TravelDocService {
             EmployeeRepository employeeRepository,
             DocumentService documentService,
             ModelMapper modelMapper,
-            TravelAssignmentRepo travelAssignmentRepo){
+            TravelAssignmentRepo travelAssignmentRepo, NotificationService notificationService){
         this.travelDocRepository = travelDocRepository;
         this.documentService = documentService;
         this.modelMapper = modelMapper;
         this.employeeRepository = employeeRepository;
         this.travelRepository = travelRepository;
         this.travelAssignmentRepo = travelAssignmentRepo;
+        this.notificationService = notificationService;
     }
 
     public TravelDocResponseDto uploadDocument(TravelDocCreateDto travelDocCreateDto , CustomUserPrincipal user) {
@@ -62,9 +65,9 @@ public class TravelDocService {
         if( user.getRole().equals("EMPLOYEE") && !travelAssignmentRepo.existsByTravelIdAndEmployeeId(travel.getId(),uploader.getId())){
             throw new ForBiddenException("You can not upload document for this travel !!");
         }
-        if(user.getRole().equals("HR") && !travel.getCreatedBy().getId().equals(user.getId())){
-            throw new ForBiddenException("You can not upload document for this travel !! !!");
-        }
+//        if(user.getRole().equals("HR") && !travel.getCreatedBy().getId().equals(user.getId())){
+//            throw new ForBiddenException("You can not upload document for this travel !! !!");
+//        }
 
         TravelDoc doc = new TravelDoc();
         doc.setTravel(travel);
@@ -83,13 +86,30 @@ public class TravelDocService {
         doc.setFileUrl(fileUrl);
 
         TravelDoc savedDoc = travelDocRepository.save(doc);
+        notificationService.sendNotification(
+                uploader , "you uploaded "+ savedDoc.getDocType() + "for travel with travel id: " + savedDoc.getTravel().getId() , "travel", travel.getId()
+        );
 
         //logging
         if( travelDocCreateDto.getOwnerId() != null ) {
+            Employee owner = employeeRepository.findById(travelDocCreateDto.getOwnerId())
+                    .orElseThrow(() -> new ResourceNotFoundException(" Employee not found with ID: " + user.getId()));
+            if(!uploader.getId().equals( owner.getId())){
+                notificationService.sendNotification(
+                        owner, "you got  " + savedDoc.getDocType() + "for travel with " + savedDoc.getTravel().getId(), "travel", travel.getId()
+                );
+            }
             log.info(
                    travelDocCreateDto.getDocTypeStr() +" uploaded by hr (" + user.getId() + ")" + "for" + travelDocCreateDto.getOwnerId()
             );
         }else{
+            travel.getTravelAssignments().forEach(
+               travelAssignment -> {
+                   notificationService.sendNotification(
+                           travelAssignment.getEmployee(), "you got  " + savedDoc.getDocType() + "for travel with id : " + savedDoc.getTravel().getId() + "hr", "travel", travel.getId()
+                   );
+               }
+            );
             log.info(
                     travelDocCreateDto.getDocTypeStr()+ " uploaded by hr (" + user.getId() + ")" + "for all assigned employee !!"
             );
@@ -101,10 +121,10 @@ public class TravelDocService {
         Travel travel = travelRepository.findById(travelId)
                 .orElseThrow(() -> new ResourceNotFoundException("Travel not found"));
 
-        if ("HR".equals(user.getRole()) &&
-                !user.getId().equals(travel.getCreatedBy().getId())) {
-            throw new ForBiddenException("you can't access this documents!!");
-        }
+//        if ("HR".equals(user.getRole()) &&
+//                !user.getId().equals(travel.getCreatedBy().getId())) {
+//            throw new ForBiddenException("you can't access this documents!!");
+//        }
         return travelDocRepository.findByTravelId(travelId).stream()
                 .map(this::mapToResponse)
                 .toList();
@@ -130,6 +150,7 @@ public class TravelDocService {
         }
         String newUrl = documentService.uploadFile(newFile, "travel", doc.getUploadedBy().getId(), false);
         doc.setFileUrl(newUrl);
+
         return mapToResponse(travelDocRepository.save(doc));
     }
 

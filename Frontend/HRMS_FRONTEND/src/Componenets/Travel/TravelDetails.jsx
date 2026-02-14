@@ -1,8 +1,9 @@
 import React from 'react'
 import { useParams } from 'react-router-dom'
-import { fetchTravelById } from '../Services/TravelService';
+import { fetchTravelById } from '../../Services/TravelService';
 import { useState,useEffect } from 'react';
 import { toast } from 'react-toastify';
+import { handleGlobalError } from '../../Services/GlobalExceptionService';
 function TravelDetails({travelId}) {
      const [travel, setTravel] = useState([]);
     useEffect(() => {
@@ -11,7 +12,7 @@ function TravelDetails({travelId}) {
                  const response = await fetchTravelById(travelId);
                  setTravel(response.data)
                } catch (e) {
-                 toast.error(err?.data?.message)
+                handleGlobalError(e);
                }
              };
              setTravelById();

@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useAuthUserContext } from "../../Contexts/AuthUserContext";
 import { uploadTravelDocument } from "../../Services/TravelDocService";
+import { handleGlobalError } from "../../Services/GlobalExceptionService";
 export default function UploadDocument() {
   const { ownerId, travelId } = useParams();
   const { authUser, setAuthUser } = useAuthUserContext();
@@ -37,9 +38,8 @@ export default function UploadDocument() {
       toast.success("Document uploaded successfully!");
       reset();
       navigate("/travel");
-    } catch (err) {
-      console.error(err);
-      toast.error("Error uploading document");
+    } catch (error) {
+      handleGlobalError(error)
     }
   };
 

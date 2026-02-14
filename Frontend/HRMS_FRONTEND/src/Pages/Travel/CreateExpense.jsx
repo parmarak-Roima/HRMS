@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { createExpense, fetchAllExpenseType } from "../../Services/TravelExpenseService";
 import { toast } from "react-toastify";
 import { useForm } from "react-hook-form";
+import { handleGlobalError } from "../../Services/GlobalExceptionService";
 
 function CreateExpense() {
   const { authUser, setAuthUser } = useAuthUserContext();
@@ -18,7 +19,7 @@ function CreateExpense() {
         console.log(response);
         setExpenseTypes(response.data);
       } catch (err) {
-        toast.error(err?.data?.message);
+        handleGlobalError(err)
       }
     };
     getAllExpenseType();
@@ -48,8 +49,7 @@ function CreateExpense() {
       reset();
       navigate(`/travel-expense/${travelAssignmentId}`)
     } catch (error) {
-      console.error(error);
-      toast.error(error?.data?.message || "Something went wrong");
+      handleGlobalError(error);
     }
   };
 

@@ -19,6 +19,7 @@ import { useEffect, useState } from "react";
 import { fetchAllEmployee } from "../../Services/authService";
 import { useAuthUserContext } from "../../Contexts/AuthUserContext";
 import { useNavigate } from "react-router-dom";
+import { handleGlobalError } from "../../Services/GlobalExceptionService";
 
 function CreateTravel() {
   const { authUser, setAuthUser } = useAuthUserContext();
@@ -31,7 +32,7 @@ function CreateTravel() {
         const response = await fetchAllEmployee();
         setEmployees(response.data);
       } catch (err) {
-        toast.error(err?.data?.message);
+        handleGlobalError(err)
       }
     };
     getAllEmployee();
@@ -66,8 +67,7 @@ function CreateTravel() {
       form.reset();
       navigate("/travel")
     } catch (err) {
-      console.error(err);
-      toast.error("Error creating travel");
+      handleGlobalError(err)
     }
   };
 

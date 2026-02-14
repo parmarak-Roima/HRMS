@@ -13,6 +13,7 @@ import com.HRMS.HRMS.exception.ResourceNotFoundException;
 import com.HRMS.HRMS.repository.EmployeeRepository;
 import com.HRMS.HRMS.repository.TravelRepositories.TravelAssignmentRepo;
 import com.HRMS.HRMS.repository.TravelRepositories.TravelRepository;
+import com.HRMS.HRMS.service.NotificationService;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,18 +33,20 @@ public class TravelAssignmentService {
      private final TravelRepository travelRepo;
      private final EmployeeRepository employeeRepo;
      private final ModelMapper modelMapper;
+    private final NotificationService notificationService;
 
     @Autowired
     public TravelAssignmentService(
             TravelAssignmentRepo travelAssignmentRepo,
             TravelRepository travelRepository,
             EmployeeRepository employeeRepository,
-            ModelMapper modelMapper
-    ){
+            ModelMapper modelMapper,
+            NotificationService notificationService){
         this.travelRepo = travelRepository;
         this.assignmentRepo = travelAssignmentRepo;
         this.modelMapper = modelMapper;
         this.employeeRepo = employeeRepository;
+        this.notificationService = notificationService;
     }
 
 
@@ -58,9 +61,9 @@ public class TravelAssignmentService {
         Employee employee = employeeRepo.findById(dto.getEmployeeId())
                 .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
 
-        if( !travel.getCreatedBy().getId().equals(user.getId()) ){
-            throw new ForBiddenException("you are not authorized to create for this travel !!") ;
-        }
+//        if( !travel.getCreatedBy().getId().equals(user.getId()) ){
+//            throw new ForBiddenException("you are not authorized to create for this travel !!") ;
+//        }
         //create travel assignment
         TravelAssignment assignment = new TravelAssignment();
         assignment.setTravel(travel);
@@ -71,6 +74,12 @@ public class TravelAssignmentService {
         assignment.setStatus(TravelStatus.SCHEDULED);
 
         TravelAssignment saved = assignmentRepo.save(assignment);
+        Employee hr = employeeRepo.findById(user.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("HR Employee not found with ID: " + user.getId()));
+        notificationService.sendNotification(
+                hr , "you are assigned employee to travel with travel id" + saved.getTravel().getId()+ "employee email-id :" + saved.getEmployee().getEmail() ,
+                "Travel"
+                ,saved.getTravel().getId());
         log.info("Travel"+"("+dto.getTravelId()+")" +" assigned for "+dto.getEmployeeId());
         return mapToResponse(saved);
     }
@@ -78,11 +87,12 @@ public class TravelAssignmentService {
     public TravelAssignmentResponseDto updateAssignment(Long id, TravelAssignmentUpdateDto dto,CustomUserPrincipal user) {
         TravelAssignment assignment = assignmentRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(" travel - Assignment not found!!!"));
-        if( !assignment.getTravel().getCreatedBy().getId().equals(user.getId()) ){
-            throw new ForBiddenException("you are not authorized to update this travel assignment !!") ;
-        }
+//        if( !assignment.getTravel().getCreatedBy().getId().equals(user.getId()) ){
+//            throw new ForBiddenException("you are not authorized to update this travel assignment !!") ;
+//        }
         modelMapper.map(dto, assignment);
         TravelAssignment updated = assignmentRepo.save(assignment);
+
         return mapToResponse(updated);
     }
 

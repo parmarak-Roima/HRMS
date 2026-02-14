@@ -1,9 +1,10 @@
 import React from 'react'
 import { useNavigate, useParams } from "react-router-dom";
-import { fetchTravelById } from "../Services/TravelService";
+import { fetchTravelById } from "../../Services/TravelService";
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify/unstyled";
-import { useAuthUserContext } from '../Contexts/AuthUserContext';
+import { useAuthUserContext } from '../../Contexts/AuthUserContext';
+import { handleGlobalError } from '../../Services/GlobalExceptionService';
 
 function TravelAssignments({travelId}) {
      const { authUser, setAuthUser } = useAuthUserContext();
@@ -17,7 +18,7 @@ function TravelAssignments({travelId}) {
             const response = await fetchTravelById(travelId);
             setTravel(response.data);
           } catch (err) {
-            toast.error(err?.data?.message);
+            handleGlobalError(err);
           }
         };
         setTravelById();

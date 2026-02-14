@@ -86,6 +86,9 @@ public class TravelService {
                 //TODO: emailService.sendTravelAssignedEmail(emp, savedTravel);
             }
         }
+        notificationService.sendNotification(
+                hr , "you are created travel!!", "travel", travel.getId()
+        );
         StringBuilder s = new StringBuilder("");
         for( int i = 0 ; i <  createTravelDto.getEmployeeIdsToAssign().toArray().length ; i++  ){
             s.append( createTravelDto.getEmployeeIdsToAssign().toArray()[i]);
@@ -135,7 +138,7 @@ public class TravelService {
                 .toList();
         switch (user.getRole()) {
             case "HR" -> {
-                authorized = travel.getCreatedBy().getId().equals(user.getId());
+                authorized = true;
             }
             case "EMPLOYEE" -> {
                 authorized = assignmentEmployeeIds.contains(user.getId());
@@ -167,9 +170,9 @@ public class TravelService {
         Travel existingTravel = travelRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Travel Plan not found with ID: " + id));
         //check if this travel is created by hr or not
-        if( user.getRole().equals("HR") && !existingTravel.getCreatedBy().getId().equals(user.getId()) ){
-            throw new ForBiddenException("you are not authorized to update this travel !!") ;
-        }
+//        if( user.getRole().equals("HR") && !existingTravel.getCreatedBy().getId().equals(user.getId()) ){
+//            throw new ForBiddenException("you are not authorized to update this travel !!") ;
+//        }
         modelMapper.map(travelDto, existingTravel);
         if (existingTravel.getEndDate().isBefore(existingTravel.getStartDate())) {
             throw new IllegalArgumentException("End Date cannot be before Start Date");

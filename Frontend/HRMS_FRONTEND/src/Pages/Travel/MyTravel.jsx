@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import TravelCard from "../../Componenets/TravelCard";
+import TravelCard from "../../Componenets/Travel/TravelCard";
 import { Loader } from "../../components/ui/Loader";
 import { useAuthUserContext } from "../../Contexts/AuthUserContext";
 import { fetchEmployeeTravel } from "../../Services/TravelAssignment";
-import { fetchHrTravel } from "../../Services/TravelService";
+import { fetchAllTravel } from "../../Services/TravelService";
 import { useNavigate } from "react-router-dom";
+import { handleGlobalError } from "../../Services/GlobalExceptionService";
 const MyTravels = () => {
   const [travels, setTravels] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,11 +19,12 @@ const MyTravels = () => {
           const response = await fetchEmployeeTravel(authUser.id);
           setTravels(response.data);
         } else if (authUser.role == "HR") {
-          const response = await fetchHrTravel(authUser.id);
+          const response = await fetchAllTravel(authUser.id);
           setTravels(response.data);
         }
       } catch (e) {
         setLoading(false);
+        handleGlobalError(e)
       } finally {
         setLoading(false);
       }
@@ -39,7 +41,9 @@ const MyTravels = () => {
           <div className="max-w-6xl mx-auto mb-8">
             <div className="grid grid-cols-1">
                  <div className="flex justify-start gap-10">
-                    <h1 className="text-3xl font-bold text-gray-900">My Travels</h1>
+                    <h1 className="text-3xl font-bold text-gray-900">
+                      
+                      My Travels</h1>
                 <div className="flex justify-end mb-3">
                 {authUser.role == "MANAGER" &&
                   <button

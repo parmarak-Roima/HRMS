@@ -15,6 +15,7 @@ import TravelDocEmployee from './Pages/Travel/TravelDocEmployee'
 import CreateExpense from './Pages/Travel/CreateExpense'
 import ShowTravelExpense from './Pages/Travel/ShowTravelExpense'
 import NotificationPage from './Pages/Travel/NotificationPage'
+import OrgChart from './Pages/OrgChart/OrgChart'
 function App() {
 
   return (
@@ -96,6 +97,12 @@ function App() {
               path="/notification/:userId"
               element={
                 <NotificationPage />
+              }
+            />
+             <Route
+              path="/orgChart/:empId"
+              element={
+                <OrgChart />
               }
             />
            </Route>
