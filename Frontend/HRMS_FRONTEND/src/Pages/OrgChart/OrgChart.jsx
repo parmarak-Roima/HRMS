@@ -35,10 +35,6 @@ function OrgChart() {
       handleGlobalError(e);
     }
   };
-  //line between cards
-  const Line = () => (
-    <div className="w-px h-8  bg-gray-300 mx-auto"></div>
-  );
   if (loading) return <div className="text-center mt-20">Loading Org Chart...</div>;
 
   return (
@@ -66,7 +62,7 @@ function OrgChart() {
               type="ancestor" 
               onClick={setCurrentId} 
             />
-            <Line />
+            <div className="w-px h-8  bg-gray-300 mx-auto"></div>
           </div>
         ))}
         <div>
@@ -75,7 +71,7 @@ function OrgChart() {
             type="focus" 
             onClick={() => {}} 
           />
-          {chartData.directReports.length > 0 && <Line />}
+          {chartData.directReports.length > 0 && <div className="w-px h-8  bg-gray-300 mx-auto"></div>}
         </div>
         {chartData.directReports.length > 0 && (
           <div>
@@ -83,7 +79,7 @@ function OrgChart() {
              <div className="flex gap-10 justify-center">
                {chartData.directReports.map((report) => (
                  <div key={report.id}>
-                   <Line />
+                   <div className="w-px h-8  bg-gray-300 mx-auto"></div>
                     <OrgChartNode 
                       employee={report} 
                       type="report" 

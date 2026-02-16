@@ -1,4 +1,4 @@
-package com.HRMS.HRMS.dto;
+package com.HRMS.HRMS.dto.Notification;
 
 import lombok.Data;
 import java.time.LocalDateTime;

@@ -1,6 +1,6 @@
 package com.HRMS.HRMS.service.Travel;
 
-import com.HRMS.HRMS.dto.CustomUserPrincipal;
+import com.HRMS.HRMS.dto.AuthDtos.CustomUserPrincipal;
 import com.HRMS.HRMS.dto.TravelDtos.TravelDocCreateDto;
 import com.HRMS.HRMS.dto.TravelDtos.TravelDocResponseDto;
 import com.HRMS.HRMS.entity.Employee;
@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j

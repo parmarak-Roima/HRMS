@@ -1,20 +1,18 @@
-package com.HRMS.HRMS.Controllers;
+package com.HRMS.HRMS.Controllers.Auth;
 
 import com.HRMS.HRMS.dto.ApiResponse;
 import com.HRMS.HRMS.dto.AuthDtos.AuthResponse;
 import com.HRMS.HRMS.dto.AuthDtos.EmployeeIdEmailDto;
 import com.HRMS.HRMS.dto.AuthDtos.LoginRequest;
-import com.HRMS.HRMS.dto.CustomUserPrincipal;
-import com.HRMS.HRMS.dto.EmployeeCreateDTO;
-import com.HRMS.HRMS.dto.EmployeeResponseDTO;
+import com.HRMS.HRMS.dto.AuthDtos.CustomUserPrincipal;
+import com.HRMS.HRMS.dto.userDtos.EmployeeCreateDTO;
+import com.HRMS.HRMS.dto.userDtos.EmployeeResponseDTO;
 import com.HRMS.HRMS.entity.Employee;
-import com.HRMS.HRMS.exception.BadRequestException;
 import com.HRMS.HRMS.repository.RoleRepository;
 import com.HRMS.HRMS.service.EmployeeService;
 import com.HRMS.HRMS.utils.JwtUtils;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.context.SecurityContextHolder;

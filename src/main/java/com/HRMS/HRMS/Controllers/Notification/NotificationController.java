@@ -1,7 +1,7 @@
 package com.HRMS.HRMS.Controllers.Notification;
 
 import com.HRMS.HRMS.dto.ApiResponse;
-import com.HRMS.HRMS.dto.NotificationDto;
+import com.HRMS.HRMS.dto.Notification.NotificationDto;
 import com.HRMS.HRMS.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

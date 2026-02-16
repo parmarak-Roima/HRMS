@@ -1,8 +1,8 @@
 package com.HRMS.HRMS.service;
 
 import com.HRMS.HRMS.dto.AuthDtos.EmployeeIdEmailDto;
-import com.HRMS.HRMS.dto.EmployeeCreateDTO;
-import com.HRMS.HRMS.dto.EmployeeResponseDTO;
+import com.HRMS.HRMS.dto.userDtos.EmployeeCreateDTO;
+import com.HRMS.HRMS.dto.userDtos.EmployeeResponseDTO;
 import com.HRMS.HRMS.entity.Employee;
 import com.HRMS.HRMS.exception.ResourceNotFoundException;
 import com.HRMS.HRMS.repository.EmployeeRepository;
@@ -14,8 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-
-import static java.util.stream.Collectors.toList;
 
 @Service
 public class EmployeeService {

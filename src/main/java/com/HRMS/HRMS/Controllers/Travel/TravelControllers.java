@@ -1,6 +1,6 @@
 package com.HRMS.HRMS.Controllers.Travel;
 
-import com.HRMS.HRMS.dto.CustomUserPrincipal;
+import com.HRMS.HRMS.dto.AuthDtos.CustomUserPrincipal;
 import com.HRMS.HRMS.dto.TravelDtos.CreateTravelDto;
 import com.HRMS.HRMS.dto.TravelDtos.ShowTravelDto;
 import com.HRMS.HRMS.service.Travel.TravelService;

@@ -1,6 +1,5 @@
-package com.HRMS.HRMS.dto;
+package com.HRMS.HRMS.dto.userDtos;
 import com.HRMS.HRMS.entity.Enums.Designations;
-import com.HRMS.HRMS.entity.Enums.EmployeeRole;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import java.time.LocalDate;

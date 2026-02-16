@@ -1,4 +1,4 @@
-package com.HRMS.HRMS.dto;
+package com.HRMS.HRMS.dto.AuthDtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

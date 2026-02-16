@@ -1,7 +1,7 @@
 package com.HRMS.HRMS.Controllers.OrgChart;
 
 import com.HRMS.HRMS.dto.ApiResponse;
-import com.HRMS.HRMS.dto.EmailSendingDto;
+import com.HRMS.HRMS.dto.EmailDtos.EmailSendingDto;
 import com.HRMS.HRMS.dto.OrgChart.OrgChartDto;
 import com.HRMS.HRMS.service.Email.EmailService;
 import com.HRMS.HRMS.service.OrgChart.OrgChartService;
@@ -31,14 +31,5 @@ public class OrgChartController {
     public ResponseEntity<ApiResponse<OrgChartDto>> getChart(@PathVariable String email) {
         OrgChartDto chart = orgChartService.getOrgChartByName(email);
         return ResponseEntity.ok(new ApiResponse<>("Org chart fetched", chart));
-    }
-    @PostMapping("/test")
-    public ResponseEntity<ApiResponse<String>> sendEmail(
-            @RequestBody EmailSendingDto dto
-    ) {
-        emailService.sendEmailWithAttachment(
-                dto
-        );
-        return ResponseEntity.ok(new ApiResponse<>("Org chart fetched", null));
     }
 }

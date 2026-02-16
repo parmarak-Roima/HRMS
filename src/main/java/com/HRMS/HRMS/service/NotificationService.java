@@ -1,6 +1,6 @@
 package com.HRMS.HRMS.service;
 
-import com.HRMS.HRMS.dto.NotificationDto;
+import com.HRMS.HRMS.dto.Notification.NotificationDto;
 import com.HRMS.HRMS.entity.Employee;
 import com.HRMS.HRMS.entity.Notification;
 import com.HRMS.HRMS.repository.NotificationRepository;

@@ -1,7 +1,7 @@
 package com.HRMS.HRMS.Controllers.Travel;
 
 import com.HRMS.HRMS.dto.ApiResponse;
-import com.HRMS.HRMS.dto.CustomUserPrincipal;
+import com.HRMS.HRMS.dto.AuthDtos.CustomUserPrincipal;
 import com.HRMS.HRMS.dto.TravelDtos.TravelAssignmentCreateDto;
 import com.HRMS.HRMS.dto.TravelDtos.TravelAssignmentResponseDto;
 import com.HRMS.HRMS.dto.TravelDtos.TravelAssignmentUpdateDto;
