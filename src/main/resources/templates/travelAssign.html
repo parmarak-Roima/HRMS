@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<p>Hi <span th:text="${name}">Employee</span>,</p>
+
+<p>A new travel plan has been assigned to you by HR. Please review the details and upload required documents.</p>
+
+<p>
+    <strong>Destination:</strong> <span th:text="${destination}">Paris</span><br>
+    <strong>Dates:</strong> <span th:text="${startDate}">01 Jan</span> to <span th:text="${endDate}">05 Jan</span><br>
+    <strong>Purpose:</strong> <span th:text="${description}">Business</span>
+</p>
+
+<p>
+    Best regards,<br>
+    Roima Intelligence , HRMS<br>
+</p>
+</body>

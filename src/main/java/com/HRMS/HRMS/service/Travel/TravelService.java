@@ -1,7 +1,9 @@
 package com.HRMS.HRMS.service.Travel;
 
 import com.HRMS.HRMS.dto.AuthDtos.EmployeeIdEmailDto;
-import com.HRMS.HRMS.dto.CustomUserPrincipal;
+import com.HRMS.HRMS.dto.AuthDtos.CustomUserPrincipal;
+import com.HRMS.HRMS.dto.EmailDtos.TravelEmailDto;
+import com.HRMS.HRMS.dto.EmailDtos.EmailSendingDto;
 import com.HRMS.HRMS.dto.TravelDtos.CreateTravelDto;
 import com.HRMS.HRMS.dto.TravelDtos.ShowTravelDto;
 import com.HRMS.HRMS.entity.Employee;
@@ -13,6 +15,8 @@ import com.HRMS.HRMS.exception.ResourceNotFoundException;
 import com.HRMS.HRMS.repository.EmployeeRepository;
 import com.HRMS.HRMS.repository.TravelRepositories.TravelAssignmentRepo;
 import com.HRMS.HRMS.repository.TravelRepositories.TravelRepository;
+import com.HRMS.HRMS.service.Email.EmailContentBuilder;
+import com.HRMS.HRMS.service.Email.EmailService;
 import com.HRMS.HRMS.service.NotificationService;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +26,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -40,17 +43,25 @@ public class TravelService {
 
     private final NotificationService notificationService;
 
+    private final EmailContentBuilder emailContentBuilder;
+
+    private final EmailService emailService;
+
     @Autowired
     public TravelService(TravelRepository travelRepository,
                          EmployeeRepository employeeRepository,
                          TravelAssignmentRepo travelAssignmentRepo,
                          ModelMapper modelMapper,
-                         NotificationService notificationService){
+                         NotificationService notificationService,
+                         EmailContentBuilder emailContentBuilder,
+                         EmailService emailService){
         this.travelRepository = travelRepository;
         this.travelAssignmentRepo = travelAssignmentRepo;
         this.employeeRepository = employeeRepository;
         this.modelMapper = modelMapper;
         this.notificationService = notificationService;
+        this.emailContentBuilder = emailContentBuilder;
+        this.emailService = emailService;
     }
 
     @Transactional
@@ -83,7 +94,7 @@ public class TravelService {
                 notificationService.sendNotification(
                     emp, "you are assigned to travel!!", "travel", user.getId()
                 );
-                //TODO: emailService.sendTravelAssignedEmail(emp, savedTravel);
+                sendMail(emp,travel);
             }
         }
         notificationService.sendNotification(
@@ -97,6 +108,17 @@ public class TravelService {
             + " for " + s.toString()
         );
         return modelMapper.map(savedTravel, CreateTravelDto.class);
+    }
+
+    private void sendMail(Employee emp , Travel travel){
+        String body = emailContentBuilder.buildEmail("travelAssign",new TravelEmailDto(
+                emp.getName(), travel.getDestination() , travel.getStartDate(), travel.getEndDate(),travel.getDescription()
+        ));
+        emailService.sendEmailWithAttachment(
+                new EmailSendingDto(
+                        body , emp.getEmail(),"Travel assigned to you !",null
+                )
+        );
     }
 
     public List<ShowTravelDto> getAllTravels() {

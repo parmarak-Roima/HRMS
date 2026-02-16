@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<h3>New Referral Received</h3>
+
+<p>Hello <span th:text="${hrName}">Team</span>,</p>
+
+<p><strong><span th:text="${referrerName}">Employee</span></strong> has referred a candidate for the <strong><span th:text="${jobTitle}">Role</span></strong> position.</p>
+
+<p>
+    <strong>Candidate Name:</strong> <span th:text="${candidateName}">Name</span><br>
+    <strong>Candidate Email:</strong> <span th:text="${candidateEmail}">Name</span><br>
+    <strong>Referred By:</strong> <span th:text="${referrerName}">Emp Name</span><br>
+    <strong>Referrer's Note:</strong> <em th:text="${note}">Notes</em>
+</p>
+
+<p><strong>Next Steps:</strong> The candidate's CV is attached to this email. Please review it.</p>
+
+<p>
+    Best regards,<br>
+    Roima Intelligence HRMS<br>
+</p>
+</body>

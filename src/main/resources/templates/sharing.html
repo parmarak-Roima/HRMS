@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<p>Hi <span>dear</span>,</p>
+
+<p>Your friend <strong><span th:text="${referrerName}">Name</span></strong> recommended a job opening at <strong><span th:text="${companyName}">Roima</span></strong> for you.</p>
+
+<p>
+    <strong>Job Title:</strong> <span th:text="${jobTitle}">Job Title</span><br>
+    <strong>Summary:</strong> <span th:text="${jobSummary}">Summary...</span>
+</p>
+<p><em>(The Job Description is attached to this email.)</em></p>
+
+<p>
+    Best regards,<br>
+    <span>Roima Intelligence</span> Recruitment Team<br>
+</p>
+</body>
+</html>

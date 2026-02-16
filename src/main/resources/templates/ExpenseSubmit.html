@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<p>Hi <span th:text="${hrName}" >HR NAME</span>,</p>
+
+<p> Expense for <span th:text="${expenseType}" >food</span>
+    uploaded by <strong><span th:text="${uploadedByName}">Name</span></strong>
+    who is on travel at <span th:text="${destination}">Destination</span> .</p>
+
+<p><em>(The expense proof attached in this mail , please review and approve or reject expense for travel.)</em></p>
+<p>
+    Best regards,<br>
+    <span>Roima Intelligence</span> Recruitment Team<br>
+</p>
+</body>
+</html>

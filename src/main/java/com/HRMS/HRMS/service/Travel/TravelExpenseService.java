@@ -1,32 +1,31 @@
 package com.HRMS.HRMS.service.Travel;
+import com.HRMS.HRMS.dto.AuthDtos.CustomUserPrincipal;
+import com.HRMS.HRMS.dto.EmailDtos.EmailSendingDto;
+import com.HRMS.HRMS.dto.EmailDtos.ExpenseSubmittedEmailDto;
 import com.HRMS.HRMS.dto.TravelDtos.ExpenseSummaryDto;
 import com.HRMS.HRMS.dto.TravelDtos.TravelExpenseCreateDto;
 import com.HRMS.HRMS.dto.TravelDtos.TravelExpenseResponseDto;
 import com.HRMS.HRMS.dto.TravelDtos.TravelExpenseUpdateDto;
 import com.HRMS.HRMS.entity.TravelEntities.*; // Your Entities
 import com.HRMS.HRMS.entity.Enums.ExpenseStatus;
-import com.HRMS.HRMS.dto.*;
 import com.HRMS.HRMS.exception.BadRequestException;
 import com.HRMS.HRMS.exception.ForBiddenException;
 import com.HRMS.HRMS.exception.ResourceNotFoundException;
 import com.HRMS.HRMS.repository.TravelRepositories.ExpenseTypeRepo;
 import com.HRMS.HRMS.repository.TravelRepositories.TravelAssignmentRepo;
 import com.HRMS.HRMS.repository.TravelRepositories.TravelExpenseRepository;
-import com.HRMS.HRMS.repository.TravelRepositories.TravelRepository;
 import com.HRMS.HRMS.service.DocumentService;
+import com.HRMS.HRMS.service.Email.EmailContentBuilder;
+import com.HRMS.HRMS.service.Email.EmailService;
 import com.HRMS.HRMS.service.NotificationService;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -36,9 +35,11 @@ public class TravelExpenseService {
      private final TravelExpenseRepository expenseRepo;
      private final TravelAssignmentRepo assignmentRepo;
      private final ExpenseTypeRepo expenseTypeRepo;
-     private final DocumentService documentService; // Cloudinary Service
+     private final DocumentService documentService;
      private final ModelMapper modelMapper;
     private final NotificationService notificationService;
+    private final EmailContentBuilder emailContentBuilder;
+    private final EmailService emailService;
 
     @Autowired
     public TravelExpenseService(
@@ -47,13 +48,18 @@ public class TravelExpenseService {
             ExpenseTypeRepo expenseTypeRepo,
             DocumentService documentService,
             ModelMapper modelMapper,
-            NotificationService notificationService){
+            NotificationService notificationService,
+            EmailContentBuilder emailContentBuilder,
+            EmailService emailService
+            ){
         this.expenseRepo = travelExpenseRepository;
         this.assignmentRepo = travelAssignmentRepo;
         this.expenseTypeRepo = expenseTypeRepo;
         this.documentService = documentService;
         this.modelMapper = modelMapper;
         this.notificationService = notificationService;
+        this.emailContentBuilder = emailContentBuilder;
+        this.emailService = emailService;
     }
 
     public TravelExpenseResponseDto createExpense(TravelExpenseCreateDto dto , CustomUserPrincipal user) {
@@ -113,7 +119,7 @@ public class TravelExpenseService {
         return mapToResponse(expenseRepo.save(expense));
     }
 
-    public TravelExpenseResponseDto updateExpenseEmployee(Long expenseId,CustomUserPrincipal user) {
+    public TravelExpenseResponseDto updateExpenseEmployee(Long expenseId, CustomUserPrincipal user) {
         TravelExpense expense = expenseRepo.findById(expenseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Expense not found"));
         List<Long> assignmentEmployeeIds = expense.getTravelAssignment().getTravel().getTravelAssignments()
@@ -140,7 +146,19 @@ public class TravelExpenseService {
         log.info(
                 "Employee with employee id:" + expense.getTravelAssignment().getEmployee().getId() + "submitted expense with expense id :-"+ expense.getId()
         );
+//        sendMail(expense);
         return mapToResponse(expenseRepo.save(expense));
+    }
+
+    private void sendMail(TravelExpense expense){
+        String body = emailContentBuilder.buildEmail("travelAssign",new ExpenseSubmittedEmailDto(
+                expense.getTravelAssignment().getTravel().getCreatedBy().getName(), expense.getExpenseType().getType() , expense.getTravelAssignment().getEmployee().getName(),expense.getTravelAssignment().getTravel().getDestination()
+        ));
+        emailService.sendEmailWithAttachment(
+                new EmailSendingDto(
+                        body , expense.getTravelAssignment().getTravel().getCreatedBy().getEmail(),"Expense submitted !",expense.getProofUrl()
+                )
+        );
     }
 
     public TravelExpenseResponseDto updateExpenseHR(Long expenseId, TravelExpenseUpdateDto dto,CustomUserPrincipal user) {
