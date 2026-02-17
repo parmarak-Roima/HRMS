@@ -72,4 +72,11 @@ public class EmployeeService {
     public Optional<Employee> findByEmail(String email){
         return employeeRepository.findByEmail(email);
     }
+
+    public List<EmployeeIdEmailDto> allHrs() {
+        List<Employee> employees = employeeRepository.findByRole_Id((long) 1);
+        return employees.stream().map(
+                employee -> {return new EmployeeIdEmailDto( employee.getId(),employee.getEmail() );}
+        ).toList();
+    }
 }

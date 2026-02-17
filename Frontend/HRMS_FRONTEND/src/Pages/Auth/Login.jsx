@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { useAuthUserContext } from "../../Contexts/AuthUserContext";
+import { handleGlobalError } from "../../Services/GlobalExceptionService";
 export default function Login() {
      const {
     register, 
@@ -21,8 +22,7 @@ export default function Login() {
     toast.success("logged in successfully !!!")
     navigate(`/profile/${response.user.id}`);
     } catch (err) {
-        toast.error(err?.data?.message)
-        console.log(err);
+        handleGlobalError(err);
     } 
   };
   return (

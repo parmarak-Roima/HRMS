@@ -1,7 +1,6 @@
 import { toast } from "react-toastify";
 
 export const handleGlobalError = (error) => {
-  console.log(error);
   let validationErrors = error?.data?.validationErrors || [];
   let message = error?.data?.message;
   const showErrorsSequentially = (errors, delay = 1500) => {
@@ -11,7 +10,8 @@ export const handleGlobalError = (error) => {
       }, index * delay);
     });
   };
-  if (validationErrors.length > 0) {
+  if (validationErrors) {
+    console.log("hello");
     showErrorsSequentially(validationErrors);
   } else if (message) {
     toast.error(message);

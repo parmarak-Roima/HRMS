@@ -10,12 +10,15 @@ import com.HRMS.HRMS.entity.JobEntities.JobOpening;
 import com.HRMS.HRMS.entity.JobEntities.JobReferral;
 import com.HRMS.HRMS.exception.ForBiddenException;
 import com.HRMS.HRMS.exception.ResourceNotFoundException;
+import com.HRMS.HRMS.repository.Config.ConfigRepository;
 import com.HRMS.HRMS.repository.EmployeeRepository;
 import com.HRMS.HRMS.repository.JobOpeningRepositories.JobOpeningRepository;
 import com.HRMS.HRMS.repository.JobOpeningRepositories.JobReferralRepository;
+import com.HRMS.HRMS.service.Config.ConfigService;
 import com.HRMS.HRMS.service.DocumentService;
 import com.HRMS.HRMS.service.Email.EmailContentBuilder;
 import com.HRMS.HRMS.service.Email.EmailService;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,6 +27,7 @@ import java.util.List;
 
 @Service
 @Transactional
+@Slf4j
 public class JobReferralService {
 
      private final JobReferralRepository referralRepo;
@@ -33,6 +37,7 @@ public class JobReferralService {
      private final EmailService emailService;
      private final ModelMapper modelMapper;
      private final EmailContentBuilder emailContentBuilder;
+     private final ConfigService configService;
     @Autowired
     public JobReferralService(
             JobReferralRepository jobReferralRepository,
@@ -41,7 +46,8 @@ public class JobReferralService {
             DocumentService documentService,
             EmailService emailService,
             ModelMapper modelMapper,
-            EmailContentBuilder emailContentBuilder
+            EmailContentBuilder emailContentBuilder,
+            ConfigService configService
     ){
         this.referralRepo = jobReferralRepository;
         this.documentService= documentService;
@@ -50,9 +56,9 @@ public class JobReferralService {
         this.emailService = emailService;
         this.modelMapper = modelMapper;
         this.emailContentBuilder =emailContentBuilder;
+        this.configService = configService;
     }
 
-    //mail to specific hr perosn pending
     public JobReferral createReferral(JobReferralCreateDto dto) {
         //fetch job and referrer
         JobOpening job = jobRepo.findById(dto.getJobId())
@@ -71,7 +77,7 @@ public class JobReferralService {
         referral.setResumeUrl(resumeUrl);
 
 //        sendMail(referral);
-
+        log.info("referral created for job opening ( "+ job.getId() + ") for role"+ job.getTitle() +"for email id"+referral.getCandidateEmail()+"by"+referral.getCandidateName());
         return referralRepo.save(referral);
     }
 
@@ -80,31 +86,40 @@ public class JobReferralService {
         return jobReferrals.stream().map(
                 jobReferral -> {
                     JobReferralResponseDto dto =  new JobReferralResponseDto();
+                    dto.setId(jobReferral.getId());
                     dto.setNote(jobReferral.getNote());
                     dto.setJobTitle(jobReferral.getJob().getTitle());
                     dto.setCandidateEmail(jobReferral.getCandidateEmail());
                     dto.setResumeUrl(jobReferral.getResumeUrl());
                     dto.setReferrerEmail(jobReferral.getReferrer().getEmail());
                     dto.setCandidateName(jobReferral.getCandidateName());
+                    dto.setStatus(jobReferral.getStatus().toString());
                     return dto;
                 }
         ).toList();
     }
 
     private void sendMail(JobReferral referral){
+        //create body for mail
         String body = emailContentBuilder.buildEmail("referral",new ReferralEmailDto(
                referral.getJob().getTitle() , referral.getCandidateName(),referral.getCandidateEmail(),
                 referral.getReferrer().getName(),referral.getNote()
         ));
+        //send mail to cv reviewers
         referral.getJob().getCvReviewers().forEach(
-                cr -> {
-                    emailService.sendEmailWithAttachment(
-                            new EmailSendingDto(
-                                    body , cr.getEmail() ,"Referral received !!",referral.getResumeUrl()
-                            )
-                    );
-                }
+                cr -> emailService.sendEmailWithAttachment(
+                        new EmailSendingDto(
+                                body , cr.getEmail() ,"Referral received !!",referral.getResumeUrl()
+                        )
+                )
         );
+        //send to specific hr mail which is configured on database
+        emailService.sendEmailWithAttachment(
+                new EmailSendingDto(
+                        body,configService.findValueByKey("HR_DEFAULT"),"Referral received !!",referral.getResumeUrl()
+                )
+        );
+        //send mail to hr owner
         emailService.sendEmailWithAttachment(
                 new EmailSendingDto(
                         body , referral.getJob().getHrOwner().getEmail() ,"Referral received !!",referral.getResumeUrl()
@@ -116,6 +131,7 @@ public class JobReferralService {
          JobReferral jobReferral = referralRepo.findById(jobReferralId).orElseThrow( () ->
                 new ResourceNotFoundException("job referral doesn't exits!!")
         );
+         String oldStatus = jobReferral.getStatus().toString();
          //check if user assigned to this job opening or not
          if(user.getRole().equals("EMPLOYEE") || user.getRole().equals("MANAGER") ) {
              List<Long> cvReviewersId = jobReferral.getJob().getCvReviewers().stream().map(
@@ -133,6 +149,7 @@ public class JobReferralService {
         }
         jobReferral.setStatus(JobReferral.ReferralStatus.valueOf(status.toUpperCase()));
         referralRepo.save(jobReferral);
+        log.info("job referral (id:- "+ jobReferral.getId() + ")status changed from " + oldStatus + "to"+jobReferral.getStatus().toString());
         return jobReferral.getStatus().toString();
     }
 }

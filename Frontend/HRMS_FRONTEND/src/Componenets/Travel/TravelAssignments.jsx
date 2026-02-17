@@ -44,7 +44,7 @@ function TravelAssignments({travelId}) {
                     </p>
                   </div>
                   <div className="flex flex-col justify-center">
-                    {(authUser.role == "HR" || authUser.role == "EMPLOYEE" && authUser.id == employee?.id )&&
+                    {( authUser.id == employee?.id )&&
                     <div>
                     <button
                       onClick={() => {

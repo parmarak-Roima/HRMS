@@ -4,10 +4,12 @@ import lombok.Data;
 
 @Data
 public class JobReferralResponseDto {
+    private Long id;
     private String jobTitle;
     private String referrerEmail;
     private String candidateName;
     private String candidateEmail;
     private String note;
     private String resumeUrl;
+    private String status;
 }

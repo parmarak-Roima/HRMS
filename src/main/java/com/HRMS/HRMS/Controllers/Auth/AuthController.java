@@ -99,6 +99,7 @@ public class AuthController {
                 HttpStatus.OK
         );
     }
+
     @GetMapping("/employee")
     public ResponseEntity<ApiResponse<List<EmployeeIdEmailDto>>> allEmployee() {
         return new ResponseEntity<>(
@@ -106,4 +107,13 @@ public class AuthController {
                 HttpStatus.OK
         );
     }
+
+    @GetMapping("/hr")
+    public ResponseEntity<ApiResponse<List<EmployeeIdEmailDto>>> allhrs() {
+        return new ResponseEntity<>(
+                new ApiResponse<>("user data",employeeService.allHrs() ),
+                HttpStatus.OK
+        );
+    }
+
 }

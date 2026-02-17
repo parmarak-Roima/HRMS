@@ -166,7 +166,7 @@ public class TravelService {
                 authorized = assignmentEmployeeIds.contains(user.getId());
             }
             case "MANAGER" -> {
-                authorized = assignmentManagerIds.contains(user.getId());
+                authorized = assignmentManagerIds.contains(user.getId()) || assignmentEmployeeIds.contains(user.getId());
             }
             default -> authorized = false; // No access for other roles
         }

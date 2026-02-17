@@ -15,3 +15,6 @@ export const fetchEmployeeById = (id) => {
 export const fetchAllEmployee = () => {
   return apiClient.get(`${CONTROLLER}/employee`);
 }
+export const fetchAllHrs = () => {
+  return apiClient.get(`${CONTROLLER}/hr`);
+}

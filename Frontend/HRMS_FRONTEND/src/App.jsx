@@ -4,7 +4,6 @@ import { ToastContainer } from 'react-toastify'
 import { Route , Routes } from 'react-router-dom'
 import Home from './Pages/Home'
 import Layout from './Layout/Layout'
-import AuthUserContextProvider from './Contexts/AuthUserContext'
 import Profile from './Pages/Profile'
 import CreateTravel from './Pages/Travel/CreateTravel'
 import ShowTravelDetails from './Pages/Travel/ShowTravelDetails'
@@ -16,6 +15,12 @@ import CreateExpense from './Pages/Travel/CreateExpense'
 import ShowTravelExpense from './Pages/Travel/ShowTravelExpense'
 import NotificationPage from './Pages/Travel/NotificationPage'
 import OrgChart from './Pages/OrgChart/OrgChart'
+import Jobs from './Pages/JobOpening/Jobs'
+import CreateJob from './Pages/JobOpening/CreateJob'
+import ShareJob from './Pages/JobOpening/ShareJob'
+import ReferraJob from './Pages/JobOpening/ReferraJob'
+import Config from './Pages/Config/Config'
+import JobReferrals from './Pages/JobOpening/JobReferrals'
 function App() {
 
   return (
@@ -103,6 +108,45 @@ function App() {
               path="/orgChart/:empId"
               element={
                 <OrgChart />
+              }
+            />
+
+//---------------------------------Job Openings ---------------------------------------//
+             <Route
+              path="/jobOpening"
+              element={
+                <Jobs />
+              }
+            />
+            <Route
+              path="/jobOpening/Create"
+              element={
+                <CreateJob />
+              }
+            />
+             <Route
+              path="/jobOpening/share/:jobId"
+              element={
+                <ShareJob />
+              }
+            />
+            <Route
+              path="/jobOpening/referr/:jobId"
+              element={
+                <ReferraJob />
+              }
+            />
+            <Route
+              path="/job-referrals/:jobId"
+              element={
+                <JobReferrals />
+              }
+            />
+            //-----------------------------------config-----------------------//
+             <Route
+              path="/config"
+              element={
+                <Config />
               }
             />
            </Route>

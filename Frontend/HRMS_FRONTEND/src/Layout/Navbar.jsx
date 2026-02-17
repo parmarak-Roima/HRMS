@@ -118,6 +118,22 @@ export default function Navbar() {
             <NavigationMenuItem>
               <NavigationMenuLink asChild>
                 <NavLink
+                  to="/jobOpening"
+                  className={({ isActive }) =>
+                    `px-3 py-2 rounded-md transition-colors ${
+                      isActive
+                        ? "bg-gray-700 text-white"
+                        : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                    }`
+                  }
+                >
+                  Job-Openings
+                </NavLink>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <NavigationMenuLink asChild>
+                <NavLink
                   to={`/notification/${authUser.id}`}
                   className={({ isActive }) =>
                     `px-3 py-2 rounded-md transition-colors ${

@@ -23,7 +23,8 @@ export default function AuthUserContextProvider({ children }) {
         })
         .then((response) => {
             console.log(response.data.data)
-          setAuthUser(response.data.data); 
+             
+          setAuthUser(response.data.data);
         })
         .catch((error) => {
             toast.error("login again");
