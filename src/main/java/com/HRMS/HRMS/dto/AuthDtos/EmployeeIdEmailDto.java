@@ -5,6 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
+
 public class EmployeeIdEmailDto {
     Long id;
     String email;

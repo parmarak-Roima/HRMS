@@ -13,6 +13,7 @@ public class ModelMapperConfig {
         ModelMapper mapper = new ModelMapper();
         mapper.getConfiguration()
                 .setPropertyCondition(Conditions.isNotNull());
+
         return mapper;
     }
 }
