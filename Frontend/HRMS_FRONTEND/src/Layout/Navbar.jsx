@@ -147,10 +147,10 @@ export default function Navbar() {
                   <span className={
                      notificationCount != 0 && "text-red-500"
                   }>Notifications</span>
-                  <span className={
+                  {/* <span className={
                     notificationCount != 0 && "text-red-500"
                   }
-                  >({notificationCount})</span>
+                  >({notificationCount})</span> */}
                   </div>
                 </NavLink>
               </NavigationMenuLink>
@@ -163,7 +163,7 @@ export default function Navbar() {
           <>
             <Button
               variant="default"
-              className="bg-blue-500 hover:bg-blue-600"
+              className="bg-black hover:bg-gray-600"
               onClick={() => Navigate("/login")}
             >
               Login

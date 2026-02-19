@@ -21,6 +21,7 @@ import ShareJob from './Pages/JobOpening/ShareJob'
 import ReferraJob from './Pages/JobOpening/ReferraJob'
 import Config from './Pages/Config/Config'
 import JobReferrals from './Pages/JobOpening/JobReferrals'
+import ShowGameHistory from './Pages/Game/ShowGameHistory'
 function App() {
 
   return (
@@ -147,6 +148,13 @@ function App() {
               path="/config"
               element={
                 <Config />
+              }
+            />
+            //---------------------------------Game-Booking---------------//
+             <Route
+              path="/game-booking"
+              element={
+                <ShowGameHistory />
               }
             />
            </Route>

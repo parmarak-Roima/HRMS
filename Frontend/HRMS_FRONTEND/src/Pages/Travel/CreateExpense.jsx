@@ -49,6 +49,7 @@ function CreateExpense() {
       reset();
       navigate(`/travel-expense/${travelAssignmentId}`)
     } catch (error) {
+      console.log(error);
       handleGlobalError(error);
     }
   };

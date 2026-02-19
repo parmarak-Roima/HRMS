@@ -96,7 +96,6 @@ function ShowTravelExpenses() {
     try {
       await submitExpenseById(travelExpenseId);
       toast.success("Submitted Successfully!!");
-      setTravelExpenses(response.data);
       const updatedResponse = await fetchTravelExpense(travelAssignmentId);
       setTravelExpenses(updatedResponse.data);
     } catch (err) {

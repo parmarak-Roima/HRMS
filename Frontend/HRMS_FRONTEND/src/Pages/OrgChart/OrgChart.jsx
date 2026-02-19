@@ -51,7 +51,7 @@ function OrgChart() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <button className='bg-black text-white rounded-2xl px-3 py-1' type="submit">Submit</button>
+          <button className='bg-black text-white rounded-2xl px-3 py-1' type="submit">Search</button>
         </form>
       </div>
       <div className="flex flex-col items-center">

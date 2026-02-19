@@ -4,10 +4,12 @@ import { Loader } from "../components/ui/Loader";
 import { useState } from "react";
 import { fetchEmployeeById } from "../Services/authService";
 import { toast } from "react-toastify";
+import { useAuthUserContext } from "../Contexts/AuthUserContext";
 function Profile() {
   let { id } = useParams();
   const [loading, setLoading] = useState(false);
   const [Employee, setEmployee] = useState(null);
+  const {authUser , setAuthUser} = useAuthUserContext();
   const navigate = useNavigate()
   useEffect(() => {
     const fetchEmployee = async () => {
@@ -39,11 +41,13 @@ function Profile() {
                   <h2 className="text-2xl text-center font-semibold mb-4">
                     Profile
                   </h2>
+                  {authUser.role == 'HR' && 
                   <button 
                     onClick={() => navigate("/config")}
                     className="px-6 py-2 bg-black text-white border rounded-2xl">
                     Config
                   </button>
+                  }
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
