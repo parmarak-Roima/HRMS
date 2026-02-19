@@ -1,9 +1,5 @@
 package com.HRMS.HRMS.dto.GameDtos;
 
-import com.HRMS.HRMS.dto.AuthDtos.EmployeeIdEmailDto;
-import com.HRMS.HRMS.entity.Employee;
-import com.HRMS.HRMS.entity.GameEntities.Game;
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

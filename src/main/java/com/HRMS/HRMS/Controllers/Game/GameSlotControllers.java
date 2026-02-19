@@ -22,11 +22,10 @@ public class GameSlotControllers {
         this.gameSlotService = gameSlotService;
     }
 
-    @PostMapping("/{gameId}")
+    @PostMapping
     public ResponseEntity<ApiResponse<Void>> createSlotForNextDay(
-            @PathVariable Long gameId
     ){
-        gameSlotService.createGameSlotForDay(gameId);
+        gameSlotService.createGameSlotForDay();
         return new ResponseEntity<>(
                 new ApiResponse<>(
                         "Slot created successFully", null
@@ -34,14 +33,13 @@ public class GameSlotControllers {
         );
     }
 
-    @GetMapping("/{gameId}/{date}")
+    @GetMapping("/{date}")
     public ResponseEntity<ApiResponse<List<GameSlotResponseDto>>> getAllSlotsByDate(
-                @PathVariable Long gameId,
                 @PathVariable LocalDate date
     ){
         return new ResponseEntity<>(
                 new ApiResponse<>(
-                        "Slot fetched successFully", gameSlotService.getAllGameSlotsByDate(gameId , date)
+                        "Slot fetched successFully", gameSlotService.getAllGameSlotsByDate(date)
                 ),HttpStatus.OK
         );
     }

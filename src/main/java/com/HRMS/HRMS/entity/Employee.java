@@ -2,6 +2,8 @@ package com.HRMS.HRMS.entity;
 
 import com.HRMS.HRMS.entity.Enums.Designations;
 import com.HRMS.HRMS.entity.Enums.EmployeeRole;
+import com.HRMS.HRMS.entity.GameEntities.BookingParticipant;
+import com.HRMS.HRMS.entity.GameEntities.GameInterest;
 import com.HRMS.HRMS.entity.TravelEntities.ExpenseType;
 import com.HRMS.HRMS.entity.TravelEntities.Travel;
 import com.HRMS.HRMS.entity.TravelEntities.TravelAssignment;
@@ -65,6 +67,12 @@ public class Employee {
 
     @OneToMany(mappedBy = "manager")
     private List<Employee> subordinates;
+
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<BookingParticipant> bookingParticipants;
+
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<GameInterest> gameInterests;
 
     public void addSubordinate(Employee subordinate) {
         subordinates.add(subordinate);

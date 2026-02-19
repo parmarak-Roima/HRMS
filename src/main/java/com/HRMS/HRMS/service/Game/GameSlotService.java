@@ -29,39 +29,41 @@ public class GameSlotService {
         this.gameRepository = gameRepository;
     }
 
-    public void createGameSlotForDay( Long gameId){
-        Game game = gameRepository.findById(gameId).orElseThrow(
-                () -> new ResourceNotFoundException("game not found")
+    public void createGameSlotForDay(){
+        List<Game> games = gameRepository.findAll();
+        games.forEach(
+                game -> {
+                    if(game.getStartTime()==null){
+                        throw new IllegalArgumentException("start time needed !!");
+
+                    }
+                    if(game.getEndTime()==null){
+                        throw new IllegalArgumentException("end time needed !!");
+
+                    }
+                    if (game.getSlotDuration() <= 0) {
+                        throw new IllegalArgumentException("Duration must be greater than zero");
+                    }
+                    if (!game.getStartTime().isBefore(game.getEndTime())) {
+                        throw new IllegalArgumentException("Start time must be before end time");
+                    }
+
+                    LocalTime slotStart = game.getStartTime();
+
+                    while (slotStart.plusMinutes(game.getSlotDuration()).isBefore(game.getEndTime()) ||
+                            slotStart.plusMinutes(game.getSlotDuration()).equals(game.getEndTime())) {
+                        LocalTime slotEnd = slotStart.plusMinutes(game.getSlotDuration());
+                        gameSlotsRepository.save(new GameSlot(
+                                game , LocalDate.now().plusDays(1),slotStart,slotEnd, GameSlot.SlotStatus.OPEN
+                        ));
+                        slotStart = slotEnd;
+                    }
+                }
         );
-        if(game.getStartTime()==null){
-            throw new IllegalArgumentException("start time needed !!");
-
-        }
-        if(game.getEndTime()==null){
-            throw new IllegalArgumentException("end time needed !!");
-
-        }
-        if (game.getSlotDuration() <= 0) {
-            throw new IllegalArgumentException("Duration must be greater than zero");
-        }
-        if (!game.getStartTime().isBefore(game.getEndTime())) {
-            throw new IllegalArgumentException("Start time must be before end time");
-        }
-
-        LocalTime slotStart = game.getStartTime();
-
-        while (slotStart.plusMinutes(game.getSlotDuration()).isBefore(game.getEndTime()) ||
-                slotStart.plusMinutes(game.getSlotDuration()).equals(game.getEndTime())) {
-            LocalTime slotEnd = slotStart.plusMinutes(game.getSlotDuration());
-            gameSlotsRepository.save(new GameSlot(
-                game , LocalDate.now().plusDays(1),slotStart,slotEnd, GameSlot.SlotStatus.OPEN
-            ));
-            slotStart = slotEnd;
-        }
     }
 
-    public List<GameSlotResponseDto> getAllGameSlotsByDate( Long gameId , LocalDate date) {
-        List<GameSlot> gameSlotList = gameSlotsRepository.findGameSlotByGame_IdAndDate( gameId , date);
+    public List<GameSlotResponseDto> getAllGameSlotsByDate(LocalDate date) {
+        List<GameSlot> gameSlotList = gameSlotsRepository.findGameSlotByDate(date);
         return gameSlotList.stream().map(
                 gameSlot -> {
                     return new GameSlotResponseDto(

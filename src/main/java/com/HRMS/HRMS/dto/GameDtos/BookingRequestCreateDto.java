@@ -11,8 +11,8 @@ import java.util.List;
 public class BookingRequestCreateDto {
     @NotNull
     private Long slotId;
-    @NotNull
-    private Long primaryBookerId;
+//    @NotNull
+//    private Long primaryBookerId;
     @NotNull
     private List<Long> participantsId;
 }

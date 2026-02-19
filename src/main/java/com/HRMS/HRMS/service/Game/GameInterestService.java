@@ -27,12 +27,13 @@ public class GameInterestService {
         this.gameInterestRepository = gameInterestRepository;
     }
 
-    public void toggleIsInterested(
+    public boolean toggleIsInterested(
             Long gameId , CustomUserPrincipal user
     ){
         GameInterest gameInterest = gameInterestRepository.findGameInterestByGame_IdAndEmployee_Id(gameId,user.getId());
         gameInterest.setInterested(!gameInterest.isInterested());
         gameInterestRepository.save(gameInterest);
+        return gameInterest.isInterested();
     }
 
     public void updatePlayedInCurrentCycleCount(

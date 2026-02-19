@@ -29,7 +29,7 @@ public class TravelExpenseController {
     }
 
     @PostMapping(consumes = "multipart/form-data")
-    @PreAuthorize("hasRole('EMPLOYEE')")
+//    @PreAuthorize("hasRole('EMPLOYEE')")
     public ResponseEntity<ApiResponse<TravelExpenseResponseDto>> createExpense(
            @Valid TravelExpenseCreateDto dto) {
         CustomUserPrincipal user = (CustomUserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

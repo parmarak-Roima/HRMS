@@ -74,6 +74,7 @@ public class TravelService {
         if (travel.getStatus() == null) {
             travel.setStatus(TravelStatus.SCHEDULED);
         }
+
         Employee hr = employeeRepository.findById(user.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("HR Employee not found with ID: " + user.getId()));
         travel.setCreatedBy(hr);

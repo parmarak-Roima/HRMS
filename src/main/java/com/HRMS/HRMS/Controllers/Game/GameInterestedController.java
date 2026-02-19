@@ -27,14 +27,13 @@ public class GameInterestedController {
     }
 
     @PatchMapping("/{gameId}")
-    public ResponseEntity<ApiResponse<Void>> toggleIsInterested(
+    public ResponseEntity<ApiResponse<Boolean>> toggleIsInterested(
             @PathVariable Long gameId
     ){
         CustomUserPrincipal user = (CustomUserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-                gameInterestService.toggleIsInterested(gameId,user);
         return new ResponseEntity<>(
                     new ApiResponse<>(
-                            "toggled interested successFully !!",null
+                            "toggled interested successFully !!",gameInterestService.toggleIsInterested(gameId,user)
 
                     ),HttpStatus.OK
                 );
@@ -50,8 +49,8 @@ public class GameInterestedController {
                 ),HttpStatus.OK
         );
     }
-    @GetMapping("/{gameID}")
-    public ResponseEntity<ApiResponse<List<EmployeeIdEmailDto>>> getAllGameInterest(
+    @GetMapping("/employee/{gameID}")
+    public ResponseEntity<ApiResponse<List<EmployeeIdEmailDto>>> getAllEmployeeGameInterestByGame(
             @PathVariable Long gameID
     ){
 

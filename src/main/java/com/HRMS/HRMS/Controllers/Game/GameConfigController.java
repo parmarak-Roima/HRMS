@@ -1,6 +1,8 @@
 package com.HRMS.HRMS.Controllers.Game;
 
 import com.HRMS.HRMS.dto.ApiResponse;
+import com.HRMS.HRMS.dto.GameDtos.GameCreationDto;
+import com.HRMS.HRMS.dto.GameDtos.GameResponseDto;
 import com.HRMS.HRMS.dto.GameDtos.UpdateGameDto;
 import com.HRMS.HRMS.entity.GameEntities.Game;
 import com.HRMS.HRMS.service.Game.GameServices;
@@ -15,7 +17,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/game/config")
-@PreAuthorize("hasRole('HR')")
+
 public class GameConfigController {
     private final GameServices gameServices;
     @Autowired
@@ -24,7 +26,7 @@ public class GameConfigController {
     }
 
     @GetMapping()
-    public ResponseEntity<ApiResponse<List<Game>>> allGame(){
+    public ResponseEntity<ApiResponse<List<GameResponseDto>>> allGame(){
         return new ResponseEntity<>(
                 new ApiResponse<
                         >(
@@ -33,7 +35,8 @@ public class GameConfigController {
     }
 
     @PatchMapping("/{gameID}")
-    public ResponseEntity<ApiResponse<Game>> updateGame(
+    @PreAuthorize("hasRole('HR')")
+    public ResponseEntity<ApiResponse<GameResponseDto>> updateGame(
             @PathVariable Long gameID,
             @RequestBody  UpdateGameDto dto){
         return new ResponseEntity<>(
@@ -41,6 +44,15 @@ public class GameConfigController {
                         >(
                     "Game Updated SuccessFully !!!" , gameServices.updateGame(gameID , dto)
                 ), HttpStatus.OK);
+    }
+
+    @PostMapping
+    @PreAuthorize("hasRole('HR')")
+    public ResponseEntity<ApiResponse<GameResponseDto>> createGame(@RequestBody GameCreationDto gameCreationDto) {
+        return new ResponseEntity<>(
+                new ApiResponse<>("Game Created Successfully", gameServices.createGame(gameCreationDto)),
+                HttpStatus.CREATED
+        );
     }
 
 }

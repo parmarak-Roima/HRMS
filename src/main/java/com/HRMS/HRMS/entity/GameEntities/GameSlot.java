@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 @Entity
 @Table(name = "game_slots")
@@ -27,6 +28,9 @@ public class GameSlot {
     private LocalTime endTime;
     @Enumerated(EnumType.STRING)
     private SlotStatus status;
+
+    @OneToMany(mappedBy = "slot", cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<BookingRequest> bookingRequests;
 
     public GameSlot(Game game, LocalDate localDate, LocalTime slotStart, LocalTime slotEnd, SlotStatus slotStatus) {
         this.game = game;
