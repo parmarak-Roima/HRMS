@@ -20,11 +20,12 @@ import { fetchAllEmployee } from "../../Services/authService";
 import { useAuthUserContext } from "../../Contexts/AuthUserContext";
 import { useNavigate } from "react-router-dom";
 import { handleGlobalError } from "../../Services/GlobalExceptionService";
+import Select from "react-select";
 
 function CreateTravel() {
   const { authUser, setAuthUser } = useAuthUserContext();
   const [employees, setEmployees] = useState([]);
-  const [selectedEmployeeIds, setSelectedEmployeeIds] = useState([]);
+  const [selectedEmployees, setSelectedEmployees] = useState([]);
   const navigate = useNavigate();
   useEffect(() => {
     const getAllEmployee = async () => {
@@ -32,11 +33,20 @@ function CreateTravel() {
         const response = await fetchAllEmployee();
         setEmployees(response.data);
       } catch (err) {
-        handleGlobalError(err)
+        handleGlobalError(err);
       }
     };
     getAllEmployee();
   }, []);
+
+  const options = employees.map((emp) => ({
+    value: emp.id,
+    label: emp.email,
+  }));
+
+  const handleChange = (selected) => {
+    setSelectedEmployees(selected);
+  };
 
   const form = useForm({
     defaultValues: {
@@ -60,18 +70,19 @@ function CreateTravel() {
     try {
       const payload = {
         ...values,
-        employeeIdsToAssign: selectedEmployeeIds,
+        employeeIdsToAssign: selectedEmployees.map((option) => option.value),
       };
+      console.log(payload);
       const res = await createTravel(payload);
       toast.success("Travel created successfully!");
       form.reset();
-      navigate("/travel")
+      navigate("/travel");
     } catch (err) {
-      handleGlobalError(err)
+      handleGlobalError(err);
     }
   };
 
-  if( authUser.role != "HR" )return <p>you can not access this page !!</p>
+  if (authUser.role != "HR") return <p>you can not access this page !!</p>;
 
   return (
     <div className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow">
@@ -146,25 +157,15 @@ function CreateTravel() {
               </FormItem>
             )}
           />
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              Assign Employees
-            </label>
-            <div className="border rounded p-3 max-h-48 overflow-y-auto space-y-2">
-              {employees.map((emp) => (
-                <label key={emp.id} className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={selectedEmployeeIds.includes(emp.id)}
-                    onChange={() => toggleEmployee(emp.id)}
-                    className="h-4 w-4"
-                  />
-                  <span>{emp.email}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
+          <label className="block text-sm font-medium mb-2">
+            Assign Employees
+          </label>
+          <Select
+            isMulti
+            options={options}
+            onChange={handleChange}
+            value={selectedEmployees}
+          />
           <Button type="submit" className="w-full">
             Create Travel
           </Button>

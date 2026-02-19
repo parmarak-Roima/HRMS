@@ -6,18 +6,28 @@ import { fetchAllEmployee, fetchAllHrs } from "../../Services/authService";
 import { handleGlobalError } from "../../Services/GlobalExceptionService";
 import { createJobOpening } from "../../Services/jobService";
 import { toast } from "react-toastify";
+import Select from "react-select";
 
 function CreateJob() {
   const { authUser, setAuthUser } = useAuthUserContext();
   const navigate = useNavigate();
   const [employees, setEmployees] = useState([]);
   const [hrs, setHrs] = useState([]);
-  const [cvReviewerIds,setCvReviewerIds] = useState([]);
+  const [cvReviewers,setCvReviewers] = useState([]);
 
   useEffect(() => {
     getAllEmployees();
     getAllHrs();
   }, []);
+
+ const options = employees.map((emp) => ({
+    value: emp.id,
+    label: emp.email,
+  }));
+
+  const handleChange = (selected) => {
+    setCvReviewers(selected);
+  };
 
   const getAllEmployees = async () => {
     try {
@@ -52,7 +62,7 @@ function CreateJob() {
       formData.append("description", data.description);
       formData.append("hrOwnerId", parseInt(data.hrOwnerId));
       formData.append("jdFile", data.jdFile[0]);
-      cvReviewerIds.forEach(
+      cvReviewers.map((option) => option.value).forEach(
         cvReviewerId => {
           formData.append("cvReviewerIds",cvReviewerId)
         }
@@ -152,19 +162,12 @@ function CreateJob() {
             <label className="block text-sm font-medium mb-2">
               Assign cv reviewers
             </label>
-            <div className="border rounded p-3 max-h-48 overflow-y-auto space-y-2">
-              {employees.map((emp) => (
-                <label key={emp.id} className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={cvReviewerIds.includes(emp.id)}
-                    onChange={() => toggleEmployee(emp.id)}
-                    className="h-4 w-4"
-                  />
-                  <span>{emp.email}</span>
-                </label>
-              ))}
-            </div>
+            <Select
+            isMulti
+            options={options}
+            onChange={handleChange}
+            value={cvReviewers}
+          />
           </div>
         <button
           type="submit"
