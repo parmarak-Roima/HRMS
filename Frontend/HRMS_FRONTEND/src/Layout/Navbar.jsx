@@ -86,7 +86,7 @@ export default function Navbar() {
             <NavigationMenuItem>
               <NavigationMenuLink asChild>
                 <NavLink
-                  to="/game-booking"
+                  to="/game/booking"
                   className={({ isActive }) =>
                     `px-3 py-2 rounded-md transition-colors ${
                       isActive
@@ -182,7 +182,7 @@ export default function Navbar() {
           </Button>
         )}
         <p className="flex justify-center px-2.5 py-2 bg-white text-black rounded-full">
-          {authUser?.role}
+          {authUser?.name}
         </p>
       </div>
     </nav>

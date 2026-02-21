@@ -33,6 +33,7 @@ public class GameInterestService {
         GameInterest gameInterest = gameInterestRepository.findGameInterestByGame_IdAndEmployee_Id(gameId,user.getId());
         gameInterest.setInterested(!gameInterest.isInterested());
         gameInterestRepository.save(gameInterest);
+
         return gameInterest.isInterested();
     }
 

@@ -33,13 +33,13 @@ public class GameSlotControllers {
         );
     }
 
-    @GetMapping("/{date}")
+    @GetMapping("/{gameId}")
     public ResponseEntity<ApiResponse<List<GameSlotResponseDto>>> getAllSlotsByDate(
-                @PathVariable LocalDate date
+            @PathVariable Long gameId
     ){
         return new ResponseEntity<>(
                 new ApiResponse<>(
-                        "Slot fetched successFully", gameSlotService.getAllGameSlotsByDate(date)
+                        "Slot fetched successFully", gameSlotService.getUpcomingGameSlots(gameId)
                 ),HttpStatus.OK
         );
     }

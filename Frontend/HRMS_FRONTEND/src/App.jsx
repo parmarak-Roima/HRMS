@@ -22,6 +22,10 @@ import ReferraJob from './Pages/JobOpening/ReferraJob'
 import Config from './Pages/Config/Config'
 import JobReferrals from './Pages/JobOpening/JobReferrals'
 import ShowGameHistory from './Pages/Game/ShowGameHistory'
+import ShowUpcomingSlot from './Pages/Game/ShowUpcomingSlot'
+import SlotBooking from './Pages/Game/SlotBooking'
+import GameConfig from './Pages/Game/GameConfig'
+import UpdateGameConfig from './Pages/Game/UpdateGameConfig'
 function App() {
 
   return (
@@ -152,9 +156,33 @@ function App() {
             />
             //---------------------------------Game-Booking---------------//
              <Route
-              path="/game-booking"
+              path="/game/booking"
               element={
                 <ShowGameHistory />
+              }
+            />
+             <Route
+              path="/game/slot/:gameId"
+              element={
+                <ShowUpcomingSlot />
+              }
+            />
+            <Route
+              path="/game/slot/:slotId/:gameId"
+              element={
+                <SlotBooking />
+              }
+            />
+            <Route
+              path="/game/config"
+              element={
+                <GameConfig />
+              }
+            />
+            <Route
+              path="/game/config/:gameId"
+              element={
+                <UpdateGameConfig />
               }
             />
            </Route>

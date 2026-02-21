@@ -10,4 +10,7 @@ public interface GameSlotsRepository extends JpaRepository<GameSlot,Long> {
     List<GameSlot> findGameSlotByGame_IdAndDate(Long gameId, LocalDate date);
 
     List<GameSlot> findGameSlotByDate(LocalDate date);
+
+    List<GameSlot> findGameSlotByDateAndStatus(LocalDate date, GameSlot.SlotStatus status);
+
 }

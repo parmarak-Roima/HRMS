@@ -69,4 +69,13 @@ public class BookingController {
         );
     }
 
+    @PostMapping("/assign")
+    public ResponseEntity<ApiResponse<Void>> assignToPrior() {
+        bookingRequestService.assignSlotToMostPrior();
+        return new ResponseEntity<>(
+                new ApiResponse<>("Assigned successFully", null),
+                HttpStatus.OK
+        );
+    }
+
 }

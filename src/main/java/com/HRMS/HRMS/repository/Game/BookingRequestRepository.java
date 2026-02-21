@@ -9,7 +9,7 @@ import java.util.List;
 public interface BookingRequestRepository  extends JpaRepository<BookingRequest,Long> {
     List<BookingRequest> findBookingRequestBySlot_Id(Long slotId);
 
-    List<BookingRequest> findByPrimaryBooker_IdOrderByRequestedAtDesc(Long id);
+    List<BookingRequest> findBookingRequestByPrimaryBooker_IdAndSlot_Date(Long primaryBookerId, LocalDate slotDate);
 
     boolean existsByPrimaryBooker_IdAndSlot_DateAndStatus(Long primaryBookerId, LocalDate slotDate, BookingRequest.RequestStatus status);
 }

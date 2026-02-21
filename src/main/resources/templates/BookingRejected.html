@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<p>Hi <span th:text="${recipientName}">Name</span>,</p>
+
+<p>Unfortunately, the <strong th:text="${gameName}">Game</strong> slot you requested on <strong th:text="${date}">Date</strong> from <strong th:text="${startTime}">Start</strong> to <strong th:text="${endTime}">End</strong> was assigned to another group based on our fair-rotation policy.</p>
+
+<p>
+    Best regards,<br>
+    <span>Roima Intelligence</span> HRMS Team<br>
+</p>
+</body>
+</html>

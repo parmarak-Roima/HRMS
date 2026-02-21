@@ -1,10 +1,10 @@
-import React from 'react'
 import MyBookingHistory from '../../Componenets/Game/MyBookingHistory'
+import GameInterest from '../../Componenets/Game/GameInterest'
 function ShowGameHistory() {
   return (
     <>
-     <MyBookingHistory />
-    <div>Show Game interest</div>
+    <GameInterest />
+    <MyBookingHistory />
     </>
   )
 }

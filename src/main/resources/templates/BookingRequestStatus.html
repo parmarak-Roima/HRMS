@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<p>Hi <span th:text="${recipientName}">Name</span>,</p>
+
+<h3>Booking Details:</h3>
+<ul>
+    <li><strong>Game:</strong> <span th:text="${gameName}">Game Name</span></li>
+    <li><strong>Status:</strong> <strong th:text="${status}">Status</strong></li>
+    <li><strong>Date:</strong> <span th:text="${date}">Date</span></li>
+    <li><strong>Time:</strong> <span th:text="${startTime}">Start</span> to <span th:text="${endTime}">End</span></li>
+    <li><strong>Booked By:</strong> <span th:text="${primaryBookerName}">Booker Name</span></li>
+</ul>
+<p>
+    Best regards,<br>
+    <span>Roima Intelligence</span> HRMS Team<br>
+</p>
+</body>
+</html>

@@ -10,7 +10,9 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -78,5 +80,36 @@ public class GameSlotService {
 
                 }
         ).toList();
+    }
+
+    public List<GameSlotResponseDto> getUpcomingGameSlots(Long gameId) {
+        LocalDate today = LocalDate.now();
+        LocalDate tomorrow = today.plusDays(1);
+
+        List<GameSlot> todaySlots = gameSlotsRepository.findGameSlotByGame_IdAndDate(gameId,today);
+        List<GameSlot> tomorrowSlots = gameSlotsRepository.findGameSlotByGame_IdAndDate(gameId , tomorrow);
+
+        List<GameSlot> allSlots = new ArrayList<>(todaySlots);
+        allSlots.addAll(tomorrowSlots);
+
+        LocalDateTime thresholdDateTime = LocalDateTime.now().plusMinutes(45);
+
+        return allSlots.stream()
+                .filter(gameSlot -> {
+
+                    LocalDateTime slotDateTime = LocalDateTime.of(gameSlot.getDate(), gameSlot.getStartTime());
+
+                    return slotDateTime.isAfter(thresholdDateTime);
+                })
+                .map(gameSlot -> new GameSlotResponseDto(
+                        gameSlot.getId(),
+                        gameSlot.getGame().getName(),
+                        gameSlot.getGame().getId(),
+                        gameSlot.getDate(),
+                        gameSlot.getStartTime(),
+                        gameSlot.getEndTime(),
+                        gameSlot.getStatus().toString()
+                ))
+                .toList();
     }
 }

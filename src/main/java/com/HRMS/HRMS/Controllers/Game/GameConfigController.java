@@ -4,20 +4,16 @@ import com.HRMS.HRMS.dto.ApiResponse;
 import com.HRMS.HRMS.dto.GameDtos.GameCreationDto;
 import com.HRMS.HRMS.dto.GameDtos.GameResponseDto;
 import com.HRMS.HRMS.dto.GameDtos.UpdateGameDto;
-import com.HRMS.HRMS.entity.GameEntities.Game;
 import com.HRMS.HRMS.service.Game.GameServices;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
 @RequestMapping("/game/config")
-
 public class GameConfigController {
     private final GameServices gameServices;
     @Autowired
@@ -32,6 +28,17 @@ public class GameConfigController {
                         >(
                         "Games fetched SuccessFully !!!" , gameServices.allGame()
                 ), HttpStatus.OK);
+    }
+
+    @GetMapping("/{gameId}")
+    public ResponseEntity<ApiResponse<GameResponseDto>> gameById(
+            @PathVariable Long gameId
+    ){
+        return new ResponseEntity<>(
+                new ApiResponse<>(
+                        "Game fetched successFully !" , gameServices.gameById(gameId)
+                )
+               ,HttpStatus.OK );
     }
 
     @PatchMapping("/{gameID}")

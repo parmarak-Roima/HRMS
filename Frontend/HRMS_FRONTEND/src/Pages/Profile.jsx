@@ -42,11 +42,18 @@ function Profile() {
                     Profile
                   </h2>
                   {authUser.role == 'HR' && 
+                  <div>
                   <button 
                     onClick={() => navigate("/config")}
                     className="px-6 py-2 bg-black text-white border rounded-2xl">
-                    Config
+                    Mail-config
                   </button>
+                  <button
+                     onClick={() => navigate("/game/config")}
+                    className="px-6 py-2 bg-black text-white border rounded-2xl">
+                    Game-Config
+                  </button>
+                  </div>
                   }
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

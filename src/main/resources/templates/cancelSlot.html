@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<p>Hi <span th:text="${recipientName}">Name</span>,</p>
+
+<p>This is to inform you that the upcoming game session has been cancelled by the primary booker (<strong th:text="${primaryBookerName}">Booker Name</strong>).</p>
+
+<h3>Cancelled Slot Details:</h3>
+<ul>
+    <li><strong>Game:</strong> <span th:text="${gameName}">Game</span></li>
+    <li><strong>Date:</strong> <span th:text="${date}">Date</span></li>
+    <li><strong>Time:</strong> <span th:text="${startTime}">Start</span> to <span th:text="${endTime}">End</span></li>
+</ul>
+
+<p>
+    Best regards,<br>
+    <span>Roima Intelligence</span> HRMS Team<br>
+</p>
+</body>
+</html>

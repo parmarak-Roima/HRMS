@@ -34,7 +34,7 @@ export default function Login() {
 
          <form onSubmit={handleSubmit(handleLogin)} className="space-y-4">
         <div>
-          <label className="block mb-1 font-medium">Email :)</label>
+          <label className="block mb-1 font-medium">Email</label>
           <input
             type="email"
             placeholder="Enter Registered Email"
@@ -52,7 +52,7 @@ export default function Login() {
           )}
         </div>
         <div>
-          <label className="block mb-1 font-medium">Password :)</label>
+          <label className="block mb-1 font-medium">Password</label>
           <input
             type="password"
             placeholder="Enter password"
