@@ -6,6 +6,7 @@ import com.HRMS.HRMS.entity.Achivements.*;
 import com.HRMS.HRMS.entity.Employee;
 import com.HRMS.HRMS.repository.AchievementRepositories.*;
 import com.HRMS.HRMS.repository.EmployeeRepository;
+import com.HRMS.HRMS.service.DocumentService;
 import com.HRMS.HRMS.service.Email.EmailContentBuilder;
 import com.HRMS.HRMS.service.Email.EmailService;
 import com.HRMS.HRMS.service.NotificationService;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -33,6 +35,7 @@ public class AchievementService {
     private final EmailService emailService;
     private final EmailContentBuilder emailContentBuilder;
     private final NotificationService notificationService;
+    private final DocumentService documentService;
 
     // ─────────────────────────────────────────────
     // FEED
@@ -41,35 +44,26 @@ public class AchievementService {
     public List<AchievementPostResponseDto> getFeed(Long currentEmployeeId,
                                                     Long authorId,
                                                     String tagName,
-                                                    LocalDate from,
-                                                    LocalDate to) {
+                                                    LocalDateTime from,
+                                                    LocalDateTime to) {
         List<AchievementPost> posts;
 
         boolean hasAuthor = authorId != null;
         boolean hasTag = tagName != null && !tagName.isBlank();
         boolean hasDate = from != null && to != null;
-        LocalDateTime fromDateTime = null;
-        LocalDateTime toDateTime = null;
 
-        if (from != null) {
-            fromDateTime = from.atStartOfDay(); // 00:00
-        }
-
-        if (to != null) {
-            toDateTime = to.atStartOfDay(); // 00:00
-        }
         if (hasAuthor && hasTag) {
             List<Long> ids = postRepository.findPostIdsByAuthorIdAndTagName(authorId, tagName);
             posts = ids.isEmpty() ? List.of() : postRepository.findByIdInAndIsDeletedFalseOrderByCreatedAtDesc(ids);
         } else if (hasAuthor && hasDate) {
-            posts = postRepository.findByAuthorIdAndIsDeletedFalseAndCreatedAtBetweenOrderByCreatedAtDesc(authorId, fromDateTime, toDateTime);
+            posts = postRepository.findByAuthorIdAndIsDeletedFalseAndCreatedAtBetweenOrderByCreatedAtDesc(authorId, from, to);
         } else if (hasAuthor) {
             posts = postRepository.findByAuthorIdAndIsDeletedFalseOrderByCreatedAtDesc(authorId);
         } else if (hasTag) {
             List<Long> ids = postRepository.findPostIdsByTagName(tagName);
             posts = ids.isEmpty() ? List.of() : postRepository.findByIdInAndIsDeletedFalseOrderByCreatedAtDesc(ids);
         } else if (hasDate) {
-            posts = postRepository.findByIsDeletedFalseAndCreatedAtBetweenOrderByCreatedAtDesc(fromDateTime, toDateTime);
+            posts = postRepository.findByIsDeletedFalseAndCreatedAtBetweenOrderByCreatedAtDesc(from, to);
         } else {
             posts = postRepository.findByIsDeletedFalseOrderByCreatedAtDesc();
         }
@@ -105,15 +99,30 @@ public class AchievementService {
             }
         }
 
-        // Handle attachments
-        if (request.getAttachments() != null) {
-            for (AttachmentDto att : request.getAttachments()) {
-                PostAttachment attachment = PostAttachment.builder()
-                        .post(post)
-                        .attachmentUrl(att.getUrl())
-                        .attachmentType(PostAttachment.AttachmentType.valueOf(att.getType().toUpperCase()))
-                        .build();
-                post.getAttachments().add(attachment);
+        // Handle file uploads via Cloudinary documentService
+        if (request.getFiles() != null) {
+            for (MultipartFile file : request.getFiles()) {
+                if (file != null && !file.isEmpty()) {
+                    String uploadedUrl = documentService.uploadFile(file, "achievements", authorId, false);
+                    // Detect type from content type
+                    String contentType = file.getContentType() != null ? file.getContentType().toLowerCase() : "";
+                    PostAttachment.AttachmentType type;
+                    if (contentType.startsWith("image")) {
+                        type = PostAttachment.AttachmentType.IMAGE;
+                    } else if (contentType.startsWith("video")) {
+                        type = PostAttachment.AttachmentType.VIDEO;
+                    } else if (contentType.contains("pdf") || contentType.contains("document")) {
+                        type = PostAttachment.AttachmentType.DOCUMENT;
+                    } else {
+                        type = PostAttachment.AttachmentType.OTHER;
+                    }
+                    PostAttachment attachment = PostAttachment.builder()
+                            .post(post)
+                            .attachmentUrl(uploadedUrl)
+                            .attachmentType(type)
+                            .build();
+                    post.getAttachments().add(attachment);
+                }
             }
         }
 

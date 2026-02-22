@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+// export default CreatePostModal;import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { X, Plus, Trash2 } from "lucide-react";
 import { createPost, updatePost } from "../../Services/AchievementService";
@@ -8,9 +8,7 @@ const CreatePostModal = ({ existingPost, onClose, onSuccess }) => {
   const isEditing = !!existingPost;
   const [tags, setTags] = useState(existingPost?.tags || []);
   const [tagInput, setTagInput] = useState("");
-  const [attachments, setAttachments] = useState(
-    existingPost?.attachmentUrls?.map((url) => ({ url, type: "OTHER" })) || []
-  );
+  const [selectedFiles, setSelectedFiles] = useState([]);
   const [submitting, setSubmitting] = useState(false);
 
   const {
@@ -34,33 +32,42 @@ const CreatePostModal = ({ existingPost, onClose, onSuccess }) => {
 
   const removeTag = (tag) => setTags((prev) => prev.filter((t) => t !== tag));
 
-  const addAttachment = () =>
-    setAttachments((prev) => [...prev, { url: "", type: "IMAGE" }]);
-
-  const updateAttachment = (index, field, value) => {
-    setAttachments((prev) =>
-      prev.map((att, i) => (i === index ? { ...att, [field]: value } : att))
-    );
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    setSelectedFiles((prev) => [...prev, ...files]);
   };
 
-  const removeAttachment = (index) =>
-    setAttachments((prev) => prev.filter((_, i) => i !== index));
+  const removeFile = (index) =>
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
 
   const onSubmit = async (values) => {
     try {
       setSubmitting(true);
-      const payload = {
-        ...values,
-        tags,
-        attachments: attachments.filter((a) => a.url.trim() !== ""),
-      };
-      let response;
+
       if (isEditing) {
-        response = await updatePost(existingPost.id, payload);
+        // Edit: send as JSON (no file change on edit)
+        const payload = {
+          title: values.title,
+          description: values.description,
+          tags,
+        };
+        const response = await updatePost(existingPost.id, payload);
+        onSuccess(response);
       } else {
-        response = await createPost(payload);
+        // Create: send as multipart/form-data
+        const formData = new FormData();
+        formData.append("title", values.title);
+        formData.append("description", values.description);
+
+        // Append each tag as separate entry
+        tags.forEach((tag) => formData.append("tags", tag));
+
+        // Append each file
+        selectedFiles.forEach((file) => formData.append("files", file));
+
+        const response = await createPost(formData);
+        onSuccess(response);
       }
-      onSuccess(response.data);
     } catch (e) {
       handleGlobalError(e);
     } finally {
@@ -71,7 +78,7 @@ const CreatePostModal = ({ existingPost, onClose, onSuccess }) => {
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-        {/* Modal Header */}
+        {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-gray-100">
           <h2 className="text-xl font-bold text-gray-900">
             {isEditing ? "Edit Post" : "Create Achievement Post"}
@@ -106,17 +113,13 @@ const CreatePostModal = ({ existingPost, onClose, onSuccess }) => {
               Description <span className="text-red-500">*</span>
             </label>
             <textarea
-              {...register("description", {
-                required: "Description is required",
-              })}
+              {...register("description", { required: "Description is required" })}
               rows={4}
               className="border border-gray-300 rounded-lg px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none"
               placeholder="Tell everyone about it..."
             />
             {errors.description && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.description.message}
-              </p>
+              <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>
             )}
           </div>
 
@@ -159,51 +162,35 @@ const CreatePostModal = ({ existingPost, onClose, onSuccess }) => {
           {/* Attachments — only on create */}
           {!isEditing && (
             <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="block text-sm font-medium text-gray-700">
-                  Attachments
-                </label>
-                <button
-                  type="button"
-                  onClick={addAttachment}
-                  className="text-xs text-black underline flex items-center gap-1"
-                >
-                  <Plus size={12} /> Add
-                </button>
-              </div>
-              <div className="space-y-2">
-                {attachments.map((att, index) => (
-                  <div key={index} className="flex gap-2 items-center">
-                    <input
-                      value={att.url}
-                      onChange={(e) =>
-                        updateAttachment(index, "url", e.target.value)
-                      }
-                      className="border border-gray-300 rounded-lg px-3 py-1.5 flex-1 text-sm focus:outline-none"
-                      placeholder="Attachment URL"
-                    />
-                    <select
-                      value={att.type}
-                      onChange={(e) =>
-                        updateAttachment(index, "type", e.target.value)
-                      }
-                      className="border border-gray-300 rounded-lg px-2 py-1.5 text-sm focus:outline-none"
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Attachments
+              </label>
+              <input
+                type="file"
+                multiple
+                onChange={handleFileChange}
+                className="border border-gray-300 rounded-lg px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-black"
+              />
+              {/* Selected files preview */}
+              {selectedFiles.length > 0 && (
+                <div className="mt-2 space-y-1">
+                  {selectedFiles.map((file, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-xs text-gray-700"
                     >
-                      <option value="IMAGE">Image</option>
-                      <option value="VIDEO">Video</option>
-                      <option value="DOCUMENT">Document</option>
-                      <option value="OTHER">Other</option>
-                    </select>
-                    <button
-                      type="button"
-                      onClick={() => removeAttachment(index)}
-                      className="text-gray-400 hover:text-red-500 transition"
-                    >
-                      <Trash2 size={15} />
-                    </button>
-                  </div>
-                ))}
-              </div>
+                      <span className="truncate max-w-xs">{file.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeFile(index)}
+                        className="text-gray-400 hover:text-red-500 transition ml-2"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -214,12 +201,8 @@ const CreatePostModal = ({ existingPost, onClose, onSuccess }) => {
             className="w-full bg-black text-white font-medium py-2 rounded-lg hover:bg-gray-800 transition disabled:opacity-50"
           >
             {submitting
-              ? isEditing
-                ? "Saving..."
-                : "Posting..."
-              : isEditing
-              ? "Save Changes"
-              : "Post Achievement"}
+              ? isEditing ? "Saving..." : "Posting..."
+              : isEditing ? "Save Changes" : "Post Achievement"}
           </button>
         </form>
       </div>

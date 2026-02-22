@@ -30,11 +30,13 @@ public class AchievementController {
     public ResponseEntity<ApiResponse<List<AchievementPostResponseDto>>> getFeed(
             @RequestParam(required = false) Long authorId,
             @RequestParam(required = false) String tagName,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate from,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate to
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
     ) {
         CustomUserPrincipal user = (CustomUserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        List<AchievementPostResponseDto> response = achievementService.getFeed(user.getId(), authorId, tagName, from, to);
+        LocalDateTime fromDateTime = from != null ? from.atStartOfDay() : null;
+        LocalDateTime toDateTime = to != null ? to.atTime(23, 59, 59) : null;
+        List<AchievementPostResponseDto> response = achievementService.getFeed(user.getId(), authorId, tagName, fromDateTime, toDateTime);
         return ResponseEntity.ok(new ApiResponse<>("Feed fetched successfully", response));
     }
 
@@ -42,16 +44,18 @@ public class AchievementController {
     // POSTS
     // ─────────────────────────────────────────────
 
-    @PostMapping("/posts")
+    // consumes multipart/form-data for file uploads
+    @PostMapping(value = "/posts", consumes = "multipart/form-data")
     @PreAuthorize("hasAnyRole('EMPLOYEE', 'MANAGER', 'HR')")
     public ResponseEntity<ApiResponse<AchievementPostResponseDto>> createPost(
-            @RequestBody CreatePostRequestDto request
+            @ModelAttribute CreatePostRequestDto request
     ) {
         CustomUserPrincipal user = (CustomUserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         AchievementPostResponseDto response = achievementService.createPost(user.getId(), request);
         return ResponseEntity.ok(new ApiResponse<>("Post created successfully", response));
     }
 
+    // Edit stays as JSON — no file change on edit
     @PutMapping("/posts/{postId}")
     @PreAuthorize("hasAnyRole('EMPLOYEE', 'MANAGER', 'HR')")
     public ResponseEntity<ApiResponse<AchievementPostResponseDto>> updatePost(
