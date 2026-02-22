@@ -10,6 +10,7 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.ResourceAccessException;
 
 import java.util.List;
 
@@ -31,9 +32,14 @@ public class GameInterestService {
             Long gameId , CustomUserPrincipal user
     ){
         GameInterest gameInterest = gameInterestRepository.findGameInterestByGame_IdAndEmployee_Id(gameId,user.getId());
+        Boolean oldStatus = gameInterest.isInterested();
+        if( gameInterest == null ){
+            throw new ResourceAccessException("Game Interest Not found!!");
+        }
         gameInterest.setInterested(!gameInterest.isInterested());
         gameInterestRepository.save(gameInterest);
 
+        log.info("Interest status for Game ID {} and User ID {} changed from {} to {}", gameId, user.getId(), oldStatus, gameInterest.isInterested());
         return gameInterest.isInterested();
     }
 
@@ -41,6 +47,9 @@ public class GameInterestService {
             Long gameId , CustomUserPrincipal user,int count
     ){
         GameInterest gameInterest = gameInterestRepository.findGameInterestByGame_IdAndEmployee_Id(gameId,user.getId());
+        if( gameInterest == null ){
+            throw new ResourceAccessException("Game Interest Not found!!");
+        }
         gameInterest.setPlayedInCurrentCycle(count);
         gameInterestRepository.save(gameInterest);
     }

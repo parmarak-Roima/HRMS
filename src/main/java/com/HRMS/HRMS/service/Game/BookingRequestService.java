@@ -17,6 +17,7 @@ import com.HRMS.HRMS.service.Email.EmailContentBuilder;
 import com.HRMS.HRMS.service.Email.EmailService;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -277,6 +278,7 @@ public class BookingRequestService {
         }
     }
 
+    @Scheduled(cron = "0 * * * * *")
     public void assignSlotToMostPrior( ){
         log.info("CRON: Starting automated slot assignment process...");
         //find slot that are after 30 minutes

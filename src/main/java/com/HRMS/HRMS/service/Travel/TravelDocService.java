@@ -120,10 +120,6 @@ public class TravelDocService {
         Travel travel = travelRepository.findById(travelId)
                 .orElseThrow(() -> new ResourceNotFoundException("Travel not found"));
 
-//        if ("HR".equals(user.getRole()) &&
-//                !user.getId().equals(travel.getCreatedBy().getId())) {
-//            throw new ForBiddenException("you can't access this documents!!");
-//        }
         return travelDocRepository.findByTravelId(travelId).stream()
                 .map(this::mapToResponse)
                 .toList();
@@ -136,7 +132,7 @@ public class TravelDocService {
     }
 
     public List<TravelDocResponseDto> getGeneralDocs(Long travelId) {
-        return travelDocRepository.findByTravelIdAndOwnerIsNull(travelId).stream()
+        return travelDocRepository.findByTravel_IdAndOwnerIsNullOrderByCreatedAtDesc(travelId).stream()
                 .map(this::mapToResponse)
                 .toList();
     }

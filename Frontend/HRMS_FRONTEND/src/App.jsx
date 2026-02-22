@@ -26,6 +26,8 @@ import ShowUpcomingSlot from './Pages/Game/ShowUpcomingSlot'
 import SlotBooking from './Pages/Game/SlotBooking'
 import GameConfig from './Pages/Game/GameConfig'
 import UpdateGameConfig from './Pages/Game/UpdateGameConfig'
+import CreateGameConfig from './Pages/Game/CreateGameConfig'
+import SlotMonitoring from './Pages/Game/SlotMonitoring'
 function App() {
 
   return (
@@ -183,6 +185,18 @@ function App() {
               path="/game/config/:gameId"
               element={
                 <UpdateGameConfig />
+              }
+            />
+            <Route
+              path="/game/create"
+              element={
+                <CreateGameConfig />
+              }
+            />
+             <Route
+              path="/game/slot-monitor/:gameId"
+              element={
+                <SlotMonitoring />
               }
             />
            </Route>

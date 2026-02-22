@@ -3,6 +3,7 @@ package com.HRMS.HRMS.Controllers.Game;
 import com.HRMS.HRMS.dto.ApiResponse;
 import com.HRMS.HRMS.dto.GameDtos.GameSlotResponseDto;
 import com.HRMS.HRMS.service.Game.GameSlotService;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -43,5 +44,14 @@ public class GameSlotControllers {
                 ),HttpStatus.OK
         );
     }
+
+    @GetMapping("/monitor/{gameId}")
+    public ResponseEntity<List<GameSlotResponseDto>> getSlotsForMonitoring(
+            @PathVariable Long gameId,
+            @RequestParam LocalDate date) {
+        return ResponseEntity.ok(gameSlotService.getGameSlotsByGameIdAndDate(gameId, date));
+    }
+
+
 
 }

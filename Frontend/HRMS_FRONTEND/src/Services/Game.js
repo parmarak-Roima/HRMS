@@ -14,3 +14,9 @@ export const updateGameConfig = (gameId , payload) => {
     headers: { "Content-Type": "application/json" },
   });
 };  
+
+export const createGameConfigg = (payload) => {
+  return apiClient.post(`${CONTROLLER}`, payload, {
+    headers: { "Content-Type": "application/json" },
+  });
+}

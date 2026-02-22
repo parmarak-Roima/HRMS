@@ -146,7 +146,7 @@ public class TravelExpenseService {
         log.info(
                 "Employee with employee id:" + expense.getTravelAssignment().getEmployee().getId() + "submitted expense with expense id :-"+ expense.getId()
         );
-//        sendMail(expense);
+        sendMail(expense);
         return mapToResponse(expenseRepo.save(expense));
     }
 
@@ -164,9 +164,6 @@ public class TravelExpenseService {
     public TravelExpenseResponseDto updateExpenseHR(Long expenseId, TravelExpenseUpdateDto dto,CustomUserPrincipal user) {
         TravelExpense expense = expenseRepo.findById(expenseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Expense not found"));
-//        if( !expense.getTravelAssignment().getTravel().getCreatedBy().getId().equals(user.getId())){
-//            throw new ForBiddenException("you can approve this expense");
-//        }
         if (dto.getStatus() == ExpenseStatus.REJECTED && (dto.getRemarks() == null || dto.getRemarks().isEmpty())) {
             throw new BadRequestException("Remarks are mandatory when rejecting.");
         }
@@ -211,9 +208,8 @@ public class TravelExpenseService {
     }
 
     public List<TravelExpenseResponseDto> getExpenseByTravelAssignmentId(Long travelAssignmentId, CustomUserPrincipal user) {
-        TravelAssignment assignment = assignmentRepo.findById(travelAssignmentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Assignment not found"));
-        return assignment.getTravelExpenses().stream().map(
+        List<TravelExpense>  travelExpenses = expenseRepo.findTravelExpenseByTravelAssignment_IdOrderByCreatedAtDesc(travelAssignmentId);
+        return travelExpenses.stream().map(
                 travelExpense -> {
                     return mapToResponse(travelExpense);
                 }

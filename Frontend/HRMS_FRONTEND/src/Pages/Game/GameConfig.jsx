@@ -44,6 +44,9 @@ function GameConfig() {
                 <h2 className="text-2xl text-center font-semibold mb-4">
                   Game-Config
                 </h2>
+                <button onClick={() => navigate("/game/create")}  className="ml-3 mb-3  bg-black text-white font-medium py-2 px-3 m rounded ">
+                  Create-Game
+                </button>
                 <div className="space-y-4">
                   {games?.map((game) => (
                     <div
@@ -101,11 +104,19 @@ function GameConfig() {
                         <div>
                           <button
                             onClick={() => {
-                                navigate(`/game/config/${game?.id}`)
+                              navigate(`/game/config/${game?.id}`);
                             }}
                             className="w-full  bg-black text-white font-medium py-2 px-3 m rounded "
                           >
                             Change-Configuration
+                          </button>
+                          <button
+                            onClick={() => {
+                              navigate(`/game/slot-monitor/${game?.id}`);
+                            }}
+                            className="w-full mt-4  bg-black text-white font-medium py-2 px-3 m rounded "
+                          >
+                            Monitor-slots
                           </button>
                         </div>
                       </div>

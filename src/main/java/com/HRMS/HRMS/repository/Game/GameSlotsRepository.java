@@ -13,4 +13,5 @@ public interface GameSlotsRepository extends JpaRepository<GameSlot,Long> {
 
     List<GameSlot> findGameSlotByDateAndStatus(LocalDate date, GameSlot.SlotStatus status);
 
+    boolean existsGameSlotByDate(LocalDate date);
 }

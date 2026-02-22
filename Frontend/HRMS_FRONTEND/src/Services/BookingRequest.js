@@ -14,3 +14,7 @@ export const makeBookingRequest = (payload) => {
     headers: { "Content-Type": "application/json" },
   });
 };
+
+export const getRequestsForSlot = (slotId) => {
+  return apiClient(`${CONTROLLER}/slot/${slotId}`);
+};

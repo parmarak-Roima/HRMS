@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @Repository
 public interface TravelExpenseRepository extends JpaRepository<TravelExpense, Long> {
@@ -25,4 +26,5 @@ public interface TravelExpenseRepository extends JpaRepository<TravelExpense, Lo
             "AND e.status = 'APPROVED'")
     BigDecimal getTotalAmountByAssignmentId(Long assignmentId);
 
+    List<TravelExpense> findTravelExpenseByTravelAssignment_IdOrderByCreatedAtDesc(Long travelAssignmentId);
 }

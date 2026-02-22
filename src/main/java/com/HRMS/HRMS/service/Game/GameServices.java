@@ -53,6 +53,7 @@ public class GameServices {
         }
         modelMapper.map(dto , existingGame);
         Game updatedGame = gameRepository.save(existingGame);
+        log.info("Successfully updated configuration for Game ID: {} ({})", gameId, updatedGame.getName());
         return modelMapper.map( updatedGame,GameResponseDto.class );
     }
 
@@ -69,10 +70,11 @@ public class GameServices {
         if( gameCreationDto.getMaxPlayers() < gameCreationDto.getMinPlayers()) {
             throw new IllegalArgumentException("Minimum player should be less then Maximum Player");
         }
-        if(gameCreationDto.getStartTime().isAfter(gameCreationDto.getEndTime())) {
+        if(!gameCreationDto.getStartTime().isBefore(gameCreationDto.getEndTime())) {
             throw new IllegalArgumentException("start time should be before end time");
         }
         Game game = gameRepository.save(modelMapper.map(gameCreationDto,Game.class));
+        log.info("Successfully created new Game: {} with ID: {}", game.getName(), game.getId());
         return modelMapper.map(game,GameResponseDto.class);
     }
 

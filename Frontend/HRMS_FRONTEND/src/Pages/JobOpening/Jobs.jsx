@@ -30,13 +30,13 @@ function Jobs() {
   };
 
   const closeJobOpening = async (jobId) => {
-    try{
-    await updateJobStatus(jobId,"CLOSED");
-    toast.success("Job Closed SuccessFully!!")
-    }catch(e){
+    try {
+      await updateJobStatus(jobId, "CLOSED");
+      toast.success("Job Closed SuccessFully!!");
+    } catch (e) {
       handleGlobalError(e);
     }
-  }
+  };
 
   if (!loading && jobs.length == 0) {
     return <p>Job Openings not found !!</p>;
@@ -106,39 +106,35 @@ function Jobs() {
                           </a>
 
                           <button
-                              onClick={() =>
-                                  navigate(`share/${job.id}`)
-                              }
+                            onClick={() => navigate(`share/${job.id}`)}
                             className="w-auto bg-black text-white text-sm py-1 px-3 mt-4 rounded  hover:bg-gray-700 "
                           >
                             Share
                           </button>
                           <button
-                              onClick={() =>
-                                navigate(`referr/${job.id}`)
-                              }
+                            onClick={() => navigate(`referr/${job.id}`)}
                             className="w-auto bg-black text-white text-sm py-1 px-3 mt-4 rounded  hover:bg-gray-700 "
                           >
                             Reffer
                           </button>
-                          {authUser.role == "HR" &&
-                           <button
-                              onClick={() =>
-                                  closeJobOpening(job.id)
-                              }
-                            className="w-auto bg-black text-white text-sm py-1 px-3 mt-4 rounded  hover:bg-gray-700 "
-                          >
-                            Close Job-Opening
-                          </button>
-                          }
-                          <button
-                              onClick={() =>
-                                navigate(`/job-referrals/${job.id}`)  
-                              }
-                            className="w-auto bg-black text-white text-sm py-1 px-3 mt-4 rounded  hover:bg-gray-700 "
-                          >
-                            All-referral
-                          </button>
+                          {authUser.role == "HR" && (
+                            <>
+                              <button
+                                onClick={() => closeJobOpening(job.id)}
+                                className="w-auto bg-black text-white text-sm py-1 px-3 mt-4 rounded  hover:bg-gray-700 "
+                              >
+                                Close Job-Opening
+                              </button>
+                              <button
+                                onClick={() =>
+                                  navigate(`/job-referrals/${job.id}`)
+                                }
+                                className="w-auto bg-black text-white text-sm py-1 px-3 mt-4 rounded  hover:bg-gray-700 "
+                              >
+                                All-referral
+                              </button>
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>

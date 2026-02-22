@@ -12,10 +12,10 @@ public interface TravelDocRepository extends JpaRepository<TravelDoc,Long> {
     List<TravelDoc> findByTravelId(Long travelId);
 
     //shared docs
-    List<TravelDoc> findByTravelIdAndOwnerIsNull(Long travelId);
+    List<TravelDoc> findByTravel_IdAndOwnerIsNullOrderByCreatedAtDesc(Long travelId);
 
     //for employee shared and specific
-    @Query("SELECT d FROM TravelDoc d WHERE d.travel.id = :travelId AND (d.owner.id = :employeeId OR d.owner IS NULL)")
+    @Query("SELECT d FROM TravelDoc d WHERE d.travel.id = :travelId AND (d.owner.id = :employeeId OR d.owner IS NULL) order by d.updatedAt desc ")
     List<TravelDoc> findByTravelIdAndEmployeeId(Long travelId, Long employeeId);
 
 }

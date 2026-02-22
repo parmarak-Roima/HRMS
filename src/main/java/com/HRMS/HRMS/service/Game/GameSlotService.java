@@ -3,11 +3,13 @@ package com.HRMS.HRMS.service.Game;
 import com.HRMS.HRMS.dto.GameDtos.GameSlotResponseDto;
 import com.HRMS.HRMS.entity.GameEntities.Game;
 import com.HRMS.HRMS.entity.GameEntities.GameSlot;
+import com.HRMS.HRMS.exception.BadRequestException;
 import com.HRMS.HRMS.exception.ResourceNotFoundException;
 import com.HRMS.HRMS.repository.Game.GameRepository;
 import com.HRMS.HRMS.repository.Game.GameSlotsRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -31,6 +33,7 @@ public class GameSlotService {
         this.gameRepository = gameRepository;
     }
 
+//    @Scheduled(cron = "0 28 21 * * *")
     public void createGameSlotForDay(){
         List<Game> games = gameRepository.findAll();
         games.forEach(
@@ -49,19 +52,21 @@ public class GameSlotService {
                     if (!game.getStartTime().isBefore(game.getEndTime())) {
                         throw new IllegalArgumentException("Start time must be before end time");
                     }
-
+                    LocalDate date = LocalDate.now().plusDays(1);
                     LocalTime slotStart = game.getStartTime();
 
                     while (slotStart.plusMinutes(game.getSlotDuration()).isBefore(game.getEndTime()) ||
                             slotStart.plusMinutes(game.getSlotDuration()).equals(game.getEndTime())) {
                         LocalTime slotEnd = slotStart.plusMinutes(game.getSlotDuration());
+
                         gameSlotsRepository.save(new GameSlot(
-                                game , LocalDate.now().plusDays(1),slotStart,slotEnd, GameSlot.SlotStatus.OPEN
+                                game ,date ,slotStart,slotEnd, GameSlot.SlotStatus.OPEN
                         ));
                         slotStart = slotEnd;
                     }
                 }
         );
+        log.info("slot generation process finished for tommorow!");
     }
 
     public List<GameSlotResponseDto> getAllGameSlotsByDate(LocalDate date) {
@@ -81,6 +86,21 @@ public class GameSlotService {
                 }
         ).toList();
     }
+
+    public List<GameSlotResponseDto> getGameSlotsByGameIdAndDate(Long gameId, LocalDate date) {
+        List<GameSlot> slots = gameSlotsRepository.findGameSlotByGame_IdAndDate(gameId, date);
+
+        return slots.stream().map(slot -> new GameSlotResponseDto(
+                slot.getId(),
+                slot.getGame().getName(),
+                slot.getGame().getId(),
+                slot.getDate(),
+                slot.getStartTime(),
+                slot.getEndTime(),
+                slot.getStatus().toString()
+        )).toList();
+    }
+
 
     public List<GameSlotResponseDto> getUpcomingGameSlots(Long gameId) {
         LocalDate today = LocalDate.now();

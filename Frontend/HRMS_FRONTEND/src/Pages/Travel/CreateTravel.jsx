@@ -26,6 +26,7 @@ function CreateTravel() {
   const { authUser, setAuthUser } = useAuthUserContext();
   const [employees, setEmployees] = useState([]);
   const [selectedEmployees, setSelectedEmployees] = useState([]);
+  const [loading,setLoading] = useState(true);
   const navigate = useNavigate();
   useEffect(() => {
     const getAllEmployee = async () => {
@@ -68,6 +69,7 @@ function CreateTravel() {
 
   const onSubmit = async (values) => {
     try {
+      setLoading(true)
       const payload = {
         ...values,
         employeeIdsToAssign: selectedEmployees.map((option) => option.value),
@@ -77,8 +79,12 @@ function CreateTravel() {
       toast.success("Travel created successfully!");
       form.reset();
       navigate("/travel");
+      setLoading(false)
     } catch (err) {
+      setLoading(false)
       handleGlobalError(err);
+    }finally{
+      setLoading(false)
     }
   };
 
@@ -166,9 +172,13 @@ function CreateTravel() {
             onChange={handleChange}
             value={selectedEmployees}
           />
-          <Button type="submit" className="w-full">
+          <button
+            disabled = {loading}
+            className=" w-full px-4 py-1.5 mt-4 bg-black text-white rounded hover:bg-gray-700"
+            type="submit"
+          >
             Create Travel
-          </Button>
+          </button>
         </form>
       </Form>
     </div>

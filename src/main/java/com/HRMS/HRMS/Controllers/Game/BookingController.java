@@ -78,4 +78,9 @@ public class BookingController {
         );
     }
 
+    @GetMapping("/slot/{slotId}")
+    public ResponseEntity<List<BookingRequestResponseDto>> getRequestsForSlot(@PathVariable Long slotId) {
+        return ResponseEntity.ok(bookingRequestService.bookingRequestForSlot(slotId));
+    }
+
 }
