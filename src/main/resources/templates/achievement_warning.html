@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<p>Hi <span th:text="${employeeName}">Name</span>,</p>
+
+<p>We wanted to inform you that your <strong th:text="${contentType}">post/comment</strong> on the Achievements feed has been removed by our HR team as it was found to violate our company's content policy.</p>
+
+<p><strong>Reason: </strong><span th:text="${reason}">Reason</span></p>
+
+<p>Please ensure that all future posts and comments align with our workplace guidelines. Repeated violations may result in further action.</p>
+
+<p>If you believe this was a mistake or have any questions, please reach out to the HR team directly.</p>
+
+<p>
+    Best regards,<br>
+    <span>Roima Intelligence</span> HRMS Team<br>
+</p>
+</body>
+</html>

@@ -33,7 +33,8 @@ public class GameSlotService {
         this.gameRepository = gameRepository;
     }
 
-//    @Scheduled(cron = "0 28 21 * * *")
+//    @Scheduled(cron = "0 14 21 * * *")
+//@Scheduled(cron = "0 14 21 * * SUN,MON,TUE,WED,THU")
     public void createGameSlotForDay(){
         List<Game> games = gameRepository.findAll();
         games.forEach(

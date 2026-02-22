@@ -102,7 +102,7 @@ export default function Navbar() {
             <NavigationMenuItem>
               <NavigationMenuLink asChild>
                 <NavLink
-                  to="/Achivements"
+                  to="/achievements"
                   className={({ isActive }) =>
                     `px-3 py-2 rounded-md transition-colors ${
                       isActive

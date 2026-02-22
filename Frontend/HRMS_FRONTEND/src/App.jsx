@@ -28,6 +28,7 @@ import GameConfig from './Pages/Game/GameConfig'
 import UpdateGameConfig from './Pages/Game/UpdateGameConfig'
 import CreateGameConfig from './Pages/Game/CreateGameConfig'
 import SlotMonitoring from './Pages/Game/SlotMonitoring'
+import AchievementsPage from './Pages/Achievement/AchievementsPage'
 function App() {
 
   return (
@@ -199,6 +200,12 @@ function App() {
                 <SlotMonitoring />
               }
             />
+            <Route
+  path="/achievements"
+  element={
+    <AchievementsPage />
+  }
+/>
            </Route>
        </Routes>
     </>

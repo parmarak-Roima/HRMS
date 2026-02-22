@@ -115,7 +115,7 @@ public class BookingRequestService {
                     Employee participant =  employeeRepository.findById(id).orElseThrow(
                             () ->     new ResourceNotFoundException("participant not found !!")
                     );
-                    //check for friends active booking
+//                    //check for friends active booking
                     if (isActiveBooking(gameSlot.getDate(),participant.getId())) {
                         throw new IllegalArgumentException("Fairness Rule: Your friends already have a active booking request for this date!");
                     }
@@ -171,11 +171,16 @@ public class BookingRequestService {
     }
 
     private boolean isActiveBooking(LocalDate date,Long userId){
-        List<BookingRequest> userBookings = bookingRequestRepository.findBookingRequestByPrimaryBooker_IdAndSlot_Date(userId,date);
+        Employee employee = employeeRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found!!"));
+        List<BookingRequest> allUserBookings = employee.getBookingParticipants().stream()
+                .map(BookingParticipant::getBookingRequest)
+                .toList();
 
         LocalDateTime now = LocalDateTime.now();
 
-        return userBookings.stream().anyMatch(booking -> {
+        return allUserBookings.stream().anyMatch(booking -> {
+            boolean isSameDate = booking.getSlot().getDate().equals(date);
             // Must be CONFIRMED
             boolean isActiveStatus = (booking.getStatus() == BookingRequest.RequestStatus.CONFIRMED);
 
@@ -183,7 +188,7 @@ public class BookingRequestService {
             LocalDateTime slotEndDateTime = LocalDateTime.of(booking.getSlot().getDate(), booking.getSlot().getEndTime());
             boolean isNotPlayedYet = slotEndDateTime.isAfter(now);
 
-            return isActiveStatus && isNotPlayedYet;
+            return isSameDate && isActiveStatus && isNotPlayedYet;
         });
     }
 
@@ -278,7 +283,7 @@ public class BookingRequestService {
         }
     }
 
-    @Scheduled(cron = "0 * * * * *")
+//    @Scheduled(cron = "0 * * * * *")
     public void assignSlotToMostPrior( ){
         log.info("CRON: Starting automated slot assignment process...");
         //find slot that are after 30 minutes

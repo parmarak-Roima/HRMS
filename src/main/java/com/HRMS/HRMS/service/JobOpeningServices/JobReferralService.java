@@ -76,7 +76,7 @@ public class JobReferralService {
         referral.setReferrer(referrer);
         referral.setResumeUrl(resumeUrl);
 
-//        sendMail(referral);
+        sendMail(referral);
         log.info("referral created for job opening ( "+ job.getId() + ") for role"+ job.getTitle() +"for email id"+referral.getCandidateEmail()+"by"+referral.getCandidateName());
         return referralRepo.save(referral);
     }

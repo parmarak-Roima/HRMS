@@ -54,7 +54,7 @@ public class JobShareService {
         shareLog.setSharedWithEmail(dto.getRecipientEmail());
         jobShareLogRepo.save(shareLog);
         //send mail
-        //sendMail(shareLog);
+        sendMail(shareLog);
         log.info("Job opening( id :" + shareLog.getJob().getId() +") shared by"+ shareLog.getSharedBy().getName() + "to"+shareLog.getSharedWithEmail());
     }
     private void sendMail(JobShareLog jobShareLog){
