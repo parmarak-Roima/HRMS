@@ -1,6 +1,7 @@
 package com.HRMS.HRMS.service.Email;
 import com.HRMS.HRMS.dto.EmailDtos.EmailSendingDto;
 import jakarta.mail.internet.MimeMessage;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.UrlResource;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 
 @Service
+@Slf4j
 public class EmailService {
 
 
@@ -38,7 +40,9 @@ public class EmailService {
                 helper.addAttachment(fileName, resource);
             }
             mailSender.send(message);
+            log.info("mail sent successfully");
         } catch (Exception e) {
+            log.error("Error in mail sending");
             throw new RuntimeException("Failed to send email: " + e.getMessage(), e);
         }
     }

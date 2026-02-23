@@ -24,7 +24,18 @@ public class DocumentService {
             if ( file == null || file.isEmpty()) {
                 throw new BadRequestException("Cannot upload empty file");
             }
-           //folder
+            long size = file.getSize(); // in bytes
+            String contentType = file.getContentType();
+            if (contentType == null ||
+                    !(contentType.equalsIgnoreCase("image/jpeg") ||
+                            contentType.equalsIgnoreCase("image/png") ||
+                            contentType.equalsIgnoreCase("application/pdf"))) {
+                throw new IllegalArgumentException("Invalid file content type.");
+            }
+            if( size>500000){
+              throw new BadRequestException("file size should be less then 500 kb");
+            }
+            //folder
             String folderPath = "hrms/" + moduleName;
 
             String publicId;
@@ -47,7 +58,7 @@ public class DocumentService {
             Map params = ObjectUtils.asMap(
                     "folder", folderPath,
                     "public_id", publicId,
-                    "resource_type", "auto" // Detects extension
+                    "resource_type", "auto"
             );
 
             Map uploadResult = cloudinary.uploader().upload(file.getBytes(), params);

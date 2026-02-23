@@ -27,14 +27,17 @@ public class GlobalExceptionHandler {
     // jwt exceptions
     @ExceptionHandler(MissingTokenException.class)
     public ResponseEntity<ErrorResponse> handleMissingToken(MissingTokenException ex, HttpServletRequest request) {
+        log.error("Token is missing exception: {}", ex.getMessage());
         return buildResponse(HttpStatus.UNAUTHORIZED, "Token missing.", request, null);
     }
     @ExceptionHandler(io.jsonwebtoken.ExpiredJwtException.class)
     public ResponseEntity<ErrorResponse> handleExpiredJwtException(io.jsonwebtoken.ExpiredJwtException ex, HttpServletRequest request) {
+        log.error("session expired: {}", ex.getMessage());
         return buildResponse(HttpStatus.UNAUTHORIZED, "Your session has expired. Please login again.", request, null);
     }
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleUsernameNotFound(UsernameNotFoundException ex, HttpServletRequest request) {
+        log.error("user not found failed: {}", ex.getMessage());
         return buildResponse(HttpStatus.NOT_FOUND, "User not found: " + ex.getMessage() , request,null);
     }
     @ExceptionHandler(AuthenticationException.class)
@@ -49,6 +52,7 @@ public class GlobalExceptionHandler {
     }
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException ex, HttpServletRequest request) {
+        log.error("Access denied exception: ", ex); // Log full stack trace
         return buildResponse(HttpStatus.FORBIDDEN, "Access denied: Insufficient permissions" , request,null);
     }
 
@@ -60,31 +64,37 @@ public class GlobalExceptionHandler {
         for (FieldError error : ex.getBindingResult().getFieldErrors()) {
             errors.add(error.getDefaultMessage());
         }
+        log.error("Validation exception: ", ex); // Log full stack trace
         return buildResponse(HttpStatus.BAD_REQUEST, "Validation Failed", request, errors);
     }
 
     @ExceptionHandler(ForBiddenException.class)
     public ResponseEntity<ErrorResponse> handleForbidden(ForBiddenException ex, HttpServletRequest request) {
+        log.error("Forbidden exception: ", ex); // Log full stack trace
         return buildResponse(HttpStatus.FORBIDDEN, ex.getMessage(), request, null);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleBadCredentials(IllegalArgumentException ex, HttpServletRequest request) {
+        log.error("Illegal arguments exception: ", ex); // Log full stack trace
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), request, null);
     }
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleBadCredentials(BadCredentialsException ex, HttpServletRequest request) {
+        log.error("Bad credential exception: ", ex); // Log full stack trace
         return buildResponse(HttpStatus.UNAUTHORIZED, "Invalid email or password", request, null);
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleNotFound(ResourceNotFoundException ex, HttpServletRequest request) {
+        log.error("Resource not found exception: ", ex); // Log full stack trace
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), request,null);
     }
 
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ErrorResponse> handleBadRequest(BadRequestException ex, HttpServletRequest request) {
+        log.error("BadRequest exception: ", ex); // Log full stack trace
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), request,null);
     }
 

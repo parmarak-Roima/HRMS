@@ -4,6 +4,7 @@ import com.HRMS.HRMS.dto.AchievementDtos.*;
 import com.HRMS.HRMS.dto.EmailDtos.EmailSendingDto;
 import com.HRMS.HRMS.entity.Achivements.*;
 import com.HRMS.HRMS.entity.Employee;
+import com.HRMS.HRMS.exception.ForBiddenException;
 import com.HRMS.HRMS.repository.AchievementRepositories.*;
 import com.HRMS.HRMS.repository.EmployeeRepository;
 import com.HRMS.HRMS.service.DocumentService;
@@ -136,7 +137,7 @@ public class AchievementService {
                 .orElseThrow(() -> new RuntimeException("Post not found"));
 
         if (!post.getAuthor().getId().equals(requesterId)) {
-            throw new RuntimeException("You are not authorized to edit this post");
+            throw new ForBiddenException("You are not authorized to edit this post");
         }
 
         post.setTitle(request.getTitle());
@@ -164,7 +165,7 @@ public class AchievementService {
         boolean isHR = "HR".equalsIgnoreCase(requesterRole);
 
         if (!isOwner && !isHR) {
-            throw new RuntimeException("You are not authorized to delete this post");
+            throw new ForBiddenException("You are not authorized to delete this post");
         }
 
         post.setIsDeleted(true);
@@ -258,7 +259,7 @@ public class AchievementService {
                 .orElseThrow(() -> new RuntimeException("Comment not found"));
 
         if (!comment.getAuthor().getId().equals(requesterId)) {
-            throw new RuntimeException("You are not authorized to edit this comment");
+            throw new ForBiddenException("You are not authorized to edit this comment");
         }
 
         comment.setText(request.getText());

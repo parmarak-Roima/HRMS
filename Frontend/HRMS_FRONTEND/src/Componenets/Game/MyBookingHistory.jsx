@@ -12,7 +12,7 @@ function MyBookingHistory() {
   const { authUser, setAuthUser } = useAuthUserContext();
   const [bookingRequests, setBookingRequests] = useState([]);
   const [loading, setLoanding] = useState(true);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   useEffect(() => {
     fetchMyBookingRequestHistory();
   }, []);
@@ -56,9 +56,15 @@ function MyBookingHistory() {
             <div className="max-w-4xl mx-auto space-y-6">
               <div className="bg-white rounded-2xl shadow p-6">
                 <div>
-                <h2 className="text-2xl text-center font-semibold">
-                  Booking History
-                </h2>
+                  <h2 className="text-2xl text-center font-semibold">
+                    Booking History
+                  </h2>
+                  <button
+                    onClick={() => navigate("/calender")}
+                    className="px-4 mb-4 bg-black text-white font-medium py-2 rounded "
+                  >
+                    Calender
+                  </button>
                 </div>
                 <div className="space-y-4">
                   {bookingRequests.map((bookingRequest) => (
@@ -82,9 +88,8 @@ function MyBookingHistory() {
                               {bookingRequest?.primaryBookedEmailId}
                             </p>
                           </div>
-                           <div>
-                            <p className="text-sm text-gray-500">
-                              Slot-Date                            </p>
+                          <div>
+                            <p className="text-sm text-gray-500">Slot-Date </p>
                             <p className="font-medium text-gray-800">
                               {bookingRequest?.slotDate}
                             </p>
@@ -139,10 +144,7 @@ function MyBookingHistory() {
                             <p className="text-sm text-gray-500">
                               Participants's-Email
                             </p>
-                            {
-                              !bookingRequest?.participant &&
-                              "NA"
-                            }
+                            {!bookingRequest?.participant && "NA"}
                             {bookingRequest?.participants?.map(
                               (participant) => {
                                 if (

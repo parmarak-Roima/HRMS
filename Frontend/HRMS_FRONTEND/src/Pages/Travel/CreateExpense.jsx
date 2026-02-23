@@ -133,6 +133,7 @@ function CreateExpense() {
             <input
               className="border rounded px-3 py-2 w-full"
               type="file"
+              accept=".jpg,.png,.pdf"
               {...register("file", { required: "File is required" })}
             />
             <span className="font-extralight text-gray-400">*if more then one docuement then share in pdf form</span>

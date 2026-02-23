@@ -75,6 +75,7 @@ export default function UploadDocument() {
           <label className="block text-sm font-medium mb-1">File</label>
           <input
             type="file"
+            accept=".jpg,.png,.pdf"
             {...register("file", { required: "File is required" })}
             className="border rounded px-3 py-2 w-full"
           />

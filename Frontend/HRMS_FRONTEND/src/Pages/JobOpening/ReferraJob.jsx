@@ -94,6 +94,7 @@ function ReferrJob() {
           <input
             className="border rounded px-3 py-2 w-full"
             type="file"
+            accept=".jpg,.png,.pdf"
             {...register("cvFile", { required: "File is required" })}
           />
           {errors.cvFile && (

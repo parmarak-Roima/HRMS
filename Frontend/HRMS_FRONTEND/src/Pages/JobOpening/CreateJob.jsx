@@ -140,6 +140,7 @@ function CreateJob() {
           <input
             className="border rounded px-3 py-2 w-full"
             type="file"
+            accept=".jpg,.png,.pdf"
             {...register("jdFile", { required: "File is required" })}
           />
           {errors.jdFile && (
