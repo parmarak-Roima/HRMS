@@ -33,7 +33,7 @@ public class GameSlotService {
         this.gameRepository = gameRepository;
     }
 
-//    @Scheduled(cron = "0 14 21 * * *")
+//    @Scheduled(cron = "0 1 19 * * *")
 //@Scheduled(cron = "0 14 21 * * SUN,MON,TUE,WED,THU")
     public void createGameSlotForDay(){
         List<Game> games = gameRepository.findAll();
@@ -113,7 +113,7 @@ public class GameSlotService {
         List<GameSlot> allSlots = new ArrayList<>(todaySlots);
         allSlots.addAll(tomorrowSlots);
 
-        LocalDateTime thresholdDateTime = LocalDateTime.now().plusMinutes(45);
+        LocalDateTime thresholdDateTime = LocalDateTime.now().plusMinutes(90);
 
         return allSlots.stream()
                 .filter(gameSlot -> {

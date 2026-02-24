@@ -45,6 +45,10 @@ function JobReferrals() {
     }
   };
 
+if (authUser.role != "HR") {
+    return <p>Only hr can access this page !!</p>;
+  }
+
   return (
     <>
       {jobReferralId ? (

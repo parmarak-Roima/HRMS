@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { X, Plus, Trash2 } from "lucide-react";
 import { createPost, updatePost } from "../../Services/AchievementService";
 import { handleGlobalError } from "../../Services/GlobalExceptionService";
+import { useState } from "react";
 
 const CreatePostModal = ({ existingPost, onClose, onSuccess }) => {
   const isEditing = !!existingPost;
@@ -52,7 +53,7 @@ const CreatePostModal = ({ existingPost, onClose, onSuccess }) => {
           tags,
         };
         const response = await updatePost(existingPost.id, payload);
-        onSuccess(response);
+        onSuccess(response.data);
       } else {
         // Create: send as multipart/form-data
         const formData = new FormData();

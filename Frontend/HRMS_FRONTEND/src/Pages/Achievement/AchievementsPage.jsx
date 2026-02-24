@@ -45,7 +45,7 @@ const AchievementsPage = () => {
   }, [loadFeed]);
 
   const handlePostCreated = (newPost) => {
-    setPosts((prev) => [newPost, ...prev]);
+    setPosts((prev) => [newPost.data, ...prev]);
     setShowCreateModal(false);
     toast.success("Post created successfully!");
   };

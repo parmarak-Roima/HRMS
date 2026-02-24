@@ -160,6 +160,7 @@ function MyBookingHistory() {
                         <div>
                           {(bookingRequest?.requestStatus == "PENDING" ||
                             bookingRequest?.requestStatus == "CONFIRMED") &&
+                            new Date(`${bookingRequest.slotDate}T${bookingRequest.startTime}`) > new Date()  &&
                             authUser.id == bookingRequest.primaryBookerId && (
                               <button
                                 disabled={loading}

@@ -67,8 +67,8 @@ public class BookingRequestService {
         }
         //employee can make booking request only before 45 minutes
         LocalDateTime slotStartDateTime = LocalDateTime.of(gameSlot.getDate(), gameSlot.getStartTime());
-        if (slotStartDateTime.minusMinutes(45).isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Booking request time is over! You must book at least 45 minutes in advance.");
+        if (slotStartDateTime.minusMinutes(90).isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Booking request time is over! You must book at least 1.5 hours in advance.");
         }
         //check for active booking of primary booker
         if (isActiveBooking(gameSlot.getDate(),user.getId())) {
@@ -216,11 +216,8 @@ public class BookingRequestService {
                 .orElseThrow(() -> new ResourceNotFoundException("Booking not found"));
         LocalDateTime slotStartDateTime = LocalDateTime.of(request.getSlot().getDate(), request.getSlot().getStartTime());
 
-        if(slotStartDateTime.isBefore(LocalDateTime.now())){
+        if (slotStartDateTime.isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("You cannot cancel a past booking!");
-        }
-        if(slotStartDateTime.minusMinutes(45).isBefore(LocalDateTime.now())){
-            throw new IllegalArgumentException("You cannot cancel now because slot start time is less than 45 minutes from now!");
         }
         //Only the Booker can cancel
         if (!request.getPrimaryBooker().getId().equals(user.getId())) {
@@ -231,10 +228,6 @@ public class BookingRequestService {
         }
         GameSlot slot = request.getSlot();
         if (request.getStatus() == BookingRequest.RequestStatus.CONFIRMED) {
-
-            slot.setStatus(GameSlot.SlotStatus.OPEN);
-            gameSlotsRepository.save(slot);
-            log.info("Cancelled booking was CONFIRMED. Re-opening Slot ID {} for Game: {}", slot.getId(), slot.getGame().getName());
             decrementPlayCount(request.getPrimaryBooker(), slot.getGame());
             if(request.getParticipants() != null){
                 for( BookingParticipant part : request.getParticipants() ){
@@ -244,12 +237,29 @@ public class BookingRequestService {
                     }
                 }
             }
+            Long newWinnerId = getWinningBookingRequestId(slot.getId());
+
+            if (newWinnerId != null) {
+                BookingRequest newWinner = bookingRequestRepository.findById(newWinnerId).get();
+                newWinner.setStatus(BookingRequest.RequestStatus.CONFIRMED);
+                incrementTeamPlayCount(newWinner);
+                bookingRequestRepository.save(newWinner);
+                log.info("AUTO-REASSIGN: Slot {} reassigned from cancelled booking to New Winner {}", slot.getId(), newWinner.getPrimaryBooker().getEmail());
+                //send mail to reassigned winner
+                sendBookingRequestMail(newWinner.getPrimaryBooker(), newWinner);
+                newWinner.getParticipants().forEach(part -> sendBookingRequestMail(part.getEmployee(), newWinner));
+                //check for cycle
+                checkAndResetCycle(slot.getGame().getId());
+            } else {
+                slot.setStatus(GameSlot.SlotStatus.OPEN);
+                gameSlotsRepository.save(slot);
+                log.info("Cancelled booking was CONFIRMED. No waitlist found. Re-opening Slot ID {}", slot.getId());
+            }
         }
         request.setStatus(BookingRequest.RequestStatus.CANCELLED);
-        log.info("Booking Request ID {} successfully CANCELLED.", bookingId);
         bookingRequestRepository.save(request);
-        //send mail
-        sendMailForCancellation( request );
+        //send cancellation mail
+        sendMailForCancellation(request);
     }
 
     private void sendMailForCancellation(BookingRequest request){
@@ -287,14 +297,16 @@ public class BookingRequestService {
     public void assignSlotToMostPrior( ){
         log.info("CRON: Starting automated slot assignment process...");
         //find slot that are after 30 minutes
-        List<GameSlot> gameSlotsForToday = gameSlotsRepository.findGameSlotByDateAndStatus(LocalDate.now(),GameSlot.SlotStatus.OPEN);
+        List<GameSlot> gameSlotsForToday = gameSlotsRepository.findGameSlotByDateAndStatus(LocalDate.now().plusDays(1),GameSlot.SlotStatus.OPEN);
         if( gameSlotsForToday.isEmpty()){
             log.info("CRON: No eligible OPEN slots found for assignment at this time.");
             return;
         }
            List<Long> slotIds = gameSlotsForToday.stream()
                 .filter(gameSlot -> {
-                   return gameSlot.getStartTime().isAfter(LocalTime.now().plusMinutes(30));
+                    LocalTime now = LocalTime.now();
+                    LocalTime oneHourFromNow = LocalTime.now().plusMinutes(61);
+                   return gameSlot.getStartTime().isAfter(now) && gameSlot.getStartTime().isBefore(oneHourFromNow);
                 })
                 .map(GameSlot::getId
                 )
@@ -324,17 +336,6 @@ public class BookingRequestService {
                                         );
                                     }
                             );
-                           //reject other requests
-                           List<BookingRequest> allPending = gameSlot.getBookingRequests().stream()
-                                   .filter(req -> req.getStatus() == BookingRequest.RequestStatus.PENDING)
-                                   .toList();
-                           for (BookingRequest loser : allPending) {
-                               if (!loser.getId().equals(winnerId)) {
-                                   loser.setStatus(BookingRequest.RequestStatus.REJECTED);
-                                   bookingRequestRepository.save(loser);
-                                   sendMailForRejection( loser );
-                               }
-                           }
                            checkAndResetCycle(gameSlot.getGame().getId());
                        }
                    }
