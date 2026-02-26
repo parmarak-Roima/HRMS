@@ -7,13 +7,17 @@ import com.HRMS.HRMS.repository.NotificationRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxSink;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -25,7 +29,8 @@ public class NotificationService {
     private final ModelMapper modelMapper;
 
     //map emitters by employee id
-    private final Map<Long, SseEmitter> userEmitters = new ConcurrentHashMap<>();
+//    private final Map<Long, SseEmitter> userEmitters = new ConcurrentHashMap<>();
+    private final Map<Long, FluxSink<ServerSentEvent<Object>>> sinks = new ConcurrentHashMap<>();
 
     @Autowired
     public NotificationService(NotificationRepository notificationRepository, ModelMapper modelMapper){
@@ -33,20 +38,28 @@ public class NotificationService {
         this.modelMapper = modelMapper;
     }
 
-    public SseEmitter subscribe(Long empId) {
-        // Set timeout to 1 hour
-        SseEmitter emitter = new SseEmitter(60 * 60 * 1000L);
-
-        userEmitters.put(empId, emitter);
-        //on completion of connection remove from map
-        emitter.onCompletion(() -> userEmitters.remove(empId));
-        //on time out remove
-        emitter.onTimeout(() -> userEmitters.remove(empId));
-        //on error remove
-        emitter.onError((e) -> userEmitters.remove(empId));
-
-        return emitter;
+    //flux connection with user id
+    public Flux<ServerSentEvent<Object>> getNotificationsForUser(Long userId) {
+        return Flux.create(sink -> {
+            sinks.put(userId, sink);
+            sink.onDispose(() -> sinks.remove(userId));
+        });
     }
+
+//    public SseEmitter subscribe(Long empId) {
+//        // Set timeout to 1 hour
+//        SseEmitter emitter = new SseEmitter(60 * 60 * 1000L);
+//
+//        userEmitters.put(empId, emitter);
+//        //on completion of connection remove from map
+//        emitter.onCompletion(() -> userEmitters.remove(empId));
+//        //on time out remove
+//        emitter.onTimeout(() -> userEmitters.remove(empId));
+//        //on error remove
+//        emitter.onError((e) -> userEmitters.remove(empId));
+//
+//        return emitter;
+//    }
 
     public List<NotificationDto> findByUserIdOrderByCreatedAtDesc(Long empId){
         return notificationRepository.findByUserIdOrderByCreatedAtDesc(empId).stream().map(
@@ -67,17 +80,25 @@ public class NotificationService {
                 notification.getType()+ "by" + notification.getReferenceId() +"for"+ notification.getMessage() );
         Notification savedNotification = notificationRepository.save(notification);
 
-        SseEmitter emitter = userEmitters.get(recipient.getId());
-        if (emitter != null) {
-            try {
-                NotificationDto dto = modelMapper.map(savedNotification, NotificationDto.class);
-                // Send an event named "new-notification" containing the DTO as JSON
-                emitter.send(SseEmitter.event().name("new-notification").data(dto));
-            } catch (IOException e) {
-                userEmitters.remove(recipient.getId());
-                log.error("Failed to send SSE to user " + recipient.getId(), e);
-            }
+//        SseEmitter emitter = userEmitters.get(recipient.getId());
+//        if (emitter != null) {
+//            try {
+//                NotificationDto dto = modelMapper.map(savedNotification, NotificationDto.class);
+//                // Send an event named "new-notification" containing the DTO as JSON
+//                emitter.send(SseEmitter.event().name("new-notification").data(dto));
+//            } catch (IOException e) {
+//                userEmitters.remove(recipient.getId());
+//                log.error("Failed to send SSE to user " + recipient.getId(), e);
+//            }
+//        }
+        //flux way to send notification
+        NotificationDto dto = modelMapper.map(savedNotification, NotificationDto.class);
+
+        FluxSink<ServerSentEvent<Object>> sink = sinks.get(recipient.getId());
+        if (sink != null) {
+            sink.next(ServerSentEvent.builder((Object) dto).event("new-notification").build());
         }
+
     }
 
     public void markAsRead(Long notificationId) {

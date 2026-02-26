@@ -36,7 +36,7 @@ public class AchievementController {
         CustomUserPrincipal user = (CustomUserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         LocalDateTime fromDateTime = from != null ? from.atStartOfDay() : null;
         LocalDateTime toDateTime = to != null ? to.atTime(23, 59, 59) : null;
-        List<AchievementPostResponseDto> response = achievementService.getFeed(user.getId(), authorId, tagName, fromDateTime, toDateTime);
+        List<AchievementPostResponseDto> response = achievementService.getFeedUsingCriteriaQuery(user.getId(), authorId, tagName, fromDateTime, toDateTime);
         return ResponseEntity.ok(new ApiResponse<>("Feed fetched successfully", response));
     }
 //    Long empId,int pageNo , int pageSize , String sortDir,String sortBy

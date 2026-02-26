@@ -11,6 +11,8 @@ import com.HRMS.HRMS.service.DocumentService;
 import com.HRMS.HRMS.service.Email.EmailContentBuilder;
 import com.HRMS.HRMS.service.Email.EmailService;
 import com.HRMS.HRMS.service.NotificationService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,6 +26,7 @@ import java.awt.print.Pageable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -41,6 +44,7 @@ public class AchievementService {
     private final EmailContentBuilder emailContentBuilder;
     private final NotificationService notificationService;
     private final DocumentService documentService;
+    private final EntityManager em;
 
     // ─────────────────────────────────────────────
     // FEED
@@ -55,6 +59,44 @@ public class AchievementService {
         return achievementPosts.getContent().stream()
                 .map(p -> mapToPostResponse(p,empId ))
                 .toList();
+    }
+
+    public List<AchievementPostResponseDto> getFeedUsingCriteriaQuery(Long currentEmployeeId, Long authorId, String tagName, LocalDateTime from, LocalDateTime to) {
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<AchievementPost> cq = cb.createQuery(AchievementPost.class);
+        Root<AchievementPost> post = cq.from(AchievementPost.class);
+
+        List<Predicate> predicates = new ArrayList<>();
+
+        //check for deleted posts
+        predicates.add(cb.isFalse(post.get("isDeleted")));
+
+       //author filter
+        if (authorId != null) {
+            Join<Object, Object> postAuthors = post.join("author");
+            predicates.add(cb.equal(postAuthors.get("id"), authorId));
+        }
+
+        //tag-name filter
+        if (tagName != null && !tagName.isBlank()) {
+            Join<Object, Object> tags = post.join("postTags").join("tag");
+            predicates.add(cb.equal(tags.get("name"), tagName));
+        }
+
+        if (from != null && to != null) {
+            predicates.add(cb.between(post.get("createdAt"), from, to));
+        }
+
+        cq.where(cb.and(predicates.toArray(new Predicate[0])));
+
+        //  Ordering
+        cq.orderBy(cb.desc(post.get("createdAt")));
+
+        List<AchievementPost> posts = em.createQuery(cq).getResultList();
+
+        return posts.stream()
+                .map(p -> mapToPostResponse(p, currentEmployeeId))
+                .collect(Collectors.toList());
     }
 
     public List<AchievementPostResponseDto> getFeed(Long currentEmployeeId,
