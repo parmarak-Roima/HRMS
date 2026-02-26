@@ -26,8 +26,8 @@ export default function Login() {
     } 
   };
   return (
-    <div className="flex min-h-screen items-start justify-center bg-gray-100 p-4">
-      <div className="w-full max-w-sm bg-white rounded-2xl shadow-lg p-6">
+    <div className="flex min-h-screen bg-linear-to-r from-gray-600 items-center justify-center bg-gray-100 p-4">
+      <div className=" bg-gray-370 w-full max-w-sm border border-black rounded-2xl shadow-lg p-6">
         <h2 className="text-2xl font-semibold text-center mb-6 text-gray-800">
           Login
         </h2>
@@ -38,7 +38,7 @@ export default function Login() {
           <input
             type="email"
             placeholder="Enter Registered Email"
-            className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-black rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-gray-500"
             {...register("email", {
               required: "Email is required",
               pattern: {
@@ -51,12 +51,12 @@ export default function Login() {
             <p className="text-red-500 text-sm">{errors.email.message}</p>
           )}
         </div>
-        <div>
+        <div className="">
           <label className="block mb-1 font-medium">Password</label>
           <input
             type="password"
             placeholder="Enter password"
-            className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-black rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-gray-500"
             {...register("password", {
               required: "Password is required",
             })}

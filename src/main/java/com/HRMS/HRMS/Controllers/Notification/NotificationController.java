@@ -4,8 +4,10 @@ import com.HRMS.HRMS.dto.ApiResponse;
 import com.HRMS.HRMS.dto.Notification.NotificationDto;
 import com.HRMS.HRMS.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
 
@@ -20,6 +22,11 @@ public class NotificationController {
             NotificationService notificationService
             ){
         this.notificationService = notificationService;
+    }
+
+    @GetMapping(value = "/stream/{empId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter streamNotifications(@PathVariable Long empId) {
+        return notificationService.subscribe(empId);
     }
 
     @GetMapping("/{empId}")

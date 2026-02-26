@@ -234,7 +234,7 @@ function ShowTravelExpenses() {
                         <button
                           onClick={() => {
                             navigate(
-                              `/travel-expense/${travelExpenses[0]?.travelAssignmentId}/Create`,
+                              `/travel-expense/${travelAssignmentId}/Create`,
                             );
                           }}
                           className="w-25 bg-black text-white font-medium py-2  px-3 rounded-2xl "

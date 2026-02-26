@@ -9,8 +9,12 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @Transactional
@@ -20,10 +24,28 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final ModelMapper modelMapper;
 
+    //map emitters by employee id
+    private final Map<Long, SseEmitter> userEmitters = new ConcurrentHashMap<>();
+
     @Autowired
     public NotificationService(NotificationRepository notificationRepository, ModelMapper modelMapper){
         this.notificationRepository = notificationRepository;
         this.modelMapper = modelMapper;
+    }
+
+    public SseEmitter subscribe(Long empId) {
+        // Set timeout to 1 hour
+        SseEmitter emitter = new SseEmitter(60 * 60 * 1000L);
+
+        userEmitters.put(empId, emitter);
+        //on completion of connection remove from map
+        emitter.onCompletion(() -> userEmitters.remove(empId));
+        //on time out remove
+        emitter.onTimeout(() -> userEmitters.remove(empId));
+        //on error remove
+        emitter.onError((e) -> userEmitters.remove(empId));
+
+        return emitter;
     }
 
     public List<NotificationDto> findByUserIdOrderByCreatedAtDesc(Long empId){
@@ -43,7 +65,19 @@ public class NotificationService {
         notification.setRead(false);
         log.info("notification sent to"+ notification.getUser().getEmail() + "of type"+
                 notification.getType()+ "by" + notification.getReferenceId() +"for"+ notification.getMessage() );
-        notificationRepository.save(notification);
+        Notification savedNotification = notificationRepository.save(notification);
+
+        SseEmitter emitter = userEmitters.get(recipient.getId());
+        if (emitter != null) {
+            try {
+                NotificationDto dto = modelMapper.map(savedNotification, NotificationDto.class);
+                // Send an event named "new-notification" containing the DTO as JSON
+                emitter.send(SseEmitter.event().name("new-notification").data(dto));
+            } catch (IOException e) {
+                userEmitters.remove(recipient.getId());
+                log.error("Failed to send SSE to user " + recipient.getId(), e);
+            }
+        }
     }
 
     public void markAsRead(Long notificationId) {

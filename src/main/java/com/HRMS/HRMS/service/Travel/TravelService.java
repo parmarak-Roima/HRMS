@@ -10,6 +10,7 @@ import com.HRMS.HRMS.entity.Employee;
 import com.HRMS.HRMS.entity.Enums.TravelStatus;
 import com.HRMS.HRMS.entity.TravelEntities.Travel;
 import com.HRMS.HRMS.entity.TravelEntities.TravelAssignment;
+import com.HRMS.HRMS.exception.BadRequestException;
 import com.HRMS.HRMS.exception.ForBiddenException;
 import com.HRMS.HRMS.exception.ResourceNotFoundException;
 import com.HRMS.HRMS.repository.EmployeeRepository;
@@ -23,6 +24,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -86,6 +89,9 @@ public class TravelService {
 
             for (Employee emp : employees) {
                 TravelAssignment assignment = new TravelAssignment();
+                if( isTravelExits(emp, travel.getStartDate() , travel.getEndDate() ) ){
+                    throw new BadRequestException("Employee "+emp.getEmail()+" already have travel for this date");
+                }
                 assignment.setTravel(savedTravel);
                 assignment.setEmployee(emp);
                 assignment.setStartDate(savedTravel.getStartDate());
@@ -109,6 +115,20 @@ public class TravelService {
             + " for " + s.toString()
         );
         return modelMapper.map(savedTravel, CreateTravelDto.class);
+    }
+
+    private boolean isTravelExits(Employee emp, LocalDate startDate , LocalDate endDate) {
+        List<TravelAssignment>  assignments  = travelAssignmentRepo.findByEmployeeId(emp.getId());
+        return assignments.stream().anyMatch(
+                (assignment)->{
+                    boolean checkStartDate = (assignment.getStartDate().isAfter(startDate) || assignment.getStartDate().equals(startDate)) && (assignment.getStartDate().isBefore(endDate) || assignment.getStartDate().equals(endDate));
+                    boolean checkEndDate =  (assignment.getEndDate().isAfter(startDate) || assignment.getEndDate().equals(startDate)) && (assignment.getEndDate().isBefore(endDate) || assignment.getEndDate().equals(endDate));
+                    boolean checkOutOfRange = assignment.getStartDate().isAfter(startDate) && assignment.getEndDate().isBefore(endDate);
+                    boolean checkInsideOfRange = assignment.getStartDate().isBefore(startDate) && assignment.getEndDate().isAfter(endDate);
+
+                    return checkStartDate || checkEndDate || checkOutOfRange || checkInsideOfRange;
+                }
+        );
     }
 
     private void sendMail(Employee emp , Travel travel){

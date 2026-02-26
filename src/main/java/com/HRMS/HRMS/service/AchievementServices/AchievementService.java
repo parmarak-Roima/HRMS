@@ -12,11 +12,15 @@ import com.HRMS.HRMS.service.Email.EmailContentBuilder;
 import com.HRMS.HRMS.service.Email.EmailService;
 import com.HRMS.HRMS.service.NotificationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.awt.print.Pageable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
@@ -41,6 +45,17 @@ public class AchievementService {
     // ─────────────────────────────────────────────
     // FEED
     // ─────────────────────────────────────────────
+
+    public  List<AchievementPostResponseDto> getFeedPageable(
+          Long empId,int pageNo , int pageSize , String sortDir,String sortBy
+    ){
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        PageRequest pageable = PageRequest.of(pageNo, pageSize, sort);
+        Page<AchievementPost> achievementPosts = postRepository.findAll(pageable);
+        return achievementPosts.getContent().stream()
+                .map(p -> mapToPostResponse(p,empId ))
+                .toList();
+    }
 
     public List<AchievementPostResponseDto> getFeed(Long currentEmployeeId,
                                                     Long authorId,

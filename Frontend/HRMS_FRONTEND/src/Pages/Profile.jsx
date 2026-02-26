@@ -1,40 +1,40 @@
 import React, { useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLoaderData, useNavigate, useParams } from "react-router-dom";
 import { Loader } from "../components/ui/Loader";
 import { useState } from "react";
 import { fetchEmployeeById } from "../Services/authService";
 import { toast } from "react-toastify";
 import { useAuthUserContext } from "../Contexts/AuthUserContext";
-function Profile() {
-  let { id } = useParams();
-  const [loading, setLoading] = useState(false);
-  const [Employee, setEmployee] = useState(null);
-  const {authUser , setAuthUser} = useAuthUserContext();
-  const navigate = useNavigate()
-  useEffect(() => {
-    const fetchEmployee = async () => {
-      try {
-        setLoading(true);
-        const data = await fetchEmployeeById(id);
-        console.log(data.data);
-        setEmployee(data.data);
-      } catch (e) {
-        toast.error(e.data.message);
-        setLoading(false);
-      } finally {
-        setLoading(false);
-      }
-    };
+// import { toast } from "react-toastify";
+// import { fetchEmployeeById } from "../Services/authService";
 
-    fetchEmployee();
-  }, []);
+// export const ProfileLoader = async ({ params }) => {
+//   try {
+//     const data = await fetchEmployeeById(params?.id);
+//     console.log(data.data);
+//     return data.data;
+//   } catch (e) {
+//     toast.error(e.data.message);
+//   } finally {
+//   }
+// };
+function Profile() {
+  const {id } = useParams()
+  const [loading, setLoading] = useState(false);
+  const [Employee, setEmployee] = useState(useLoaderData());
+  const {authUser , setAuthUser} = useAuthUserContext();
+
+  if( id != authUser.id){
+    return <p className="text-center mt-4">
+      You are not authorized to see this profile!!
+    </p>
+  }
+  const navigate = useNavigate()
   return (
     <>
       <div className="flex flex-col items-center gap-4 p-6">
-        {loading ? (
-          <Loader size={32} />
-        ) : (
-          <div className="w-full min-h-screen bg-gray-100 p-6">
+         
+          <div className="overflow-x-scroll w-full min-h-screen bg-gray-100 p-6">
             <div className="max-w-4xl mx-auto space-y-6">
               <div className="bg-white rounded-2xl shadow p-6">
                 <div className="flex justify-around items-center">
@@ -97,7 +97,6 @@ function Profile() {
               </div>
             </div>
           </div>
-        )}
       </div>
     </>
   );

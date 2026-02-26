@@ -60,7 +60,7 @@ function MyBookingHistory() {
                     Booking History
                   </h2>
                   <button
-                    onClick={() => navigate("/calender")}
+                    onClick={() => navigate("/game/calender")}
                     className="px-4 mb-4 bg-black text-white font-medium py-2 rounded "
                   >
                     Calender

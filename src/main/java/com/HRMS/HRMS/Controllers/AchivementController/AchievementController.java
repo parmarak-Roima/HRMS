@@ -39,6 +39,20 @@ public class AchievementController {
         List<AchievementPostResponseDto> response = achievementService.getFeed(user.getId(), authorId, tagName, fromDateTime, toDateTime);
         return ResponseEntity.ok(new ApiResponse<>("Feed fetched successfully", response));
     }
+//    Long empId,int pageNo , int pageSize , String sortDir,String sortBy
+//    @GetMapping("/feed")
+//    @PreAuthorize("hasAnyRole('EMPLOYEE', 'MANAGER', 'HR')")
+//    public ResponseEntity<ApiResponse<List<AchievementPostResponseDto>>> getFeed(
+//            @RequestParam(required = false) int pageNo,
+//            @RequestParam(required = false) int pageSize,
+//            @RequestParam(required = false) String sortBy,
+//            @RequestParam(required = false) String sortDir
+//    ) {
+//        CustomUserPrincipal user = (CustomUserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+//        List<AchievementPostResponseDto> response = achievementService.getFeedPageable(user.getId(), pageNo, pageSize, sortDir, sortBy);
+//        return ResponseEntity.ok(new ApiResponse<>("Feed fetched successfully", response));
+//    }
+
 
     // ─────────────────────────────────────────────
     // POSTS
