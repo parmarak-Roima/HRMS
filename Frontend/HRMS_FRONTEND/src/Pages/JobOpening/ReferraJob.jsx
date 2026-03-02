@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { createReferral } from "../../Services/JobReferralService";
 import { handleGlobalError } from "../../Services/GlobalExceptionService";
 import { toast } from "react-toastify";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 function ReferrJob() {
   const { jobId } = useParams();
@@ -15,9 +16,21 @@ function ReferrJob() {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm();
+  const queryClient = useQueryClient()
+
+ const mutation = useMutation({
+    mutationFn: createReferral,
+    onSuccess: async () => {
+       await queryClient.invalidateQueries({ queryKey: ['job-referrals',jobId] });
+      toast.success("Referred SuccessFully!!!");
+      navigate("/jobOpening");
+    },
+    onError: (error) => {
+      handleGlobalError(error);
+    }
+  });
 
   const onSubmit = async (data) => {
-    try {
       const formData = new FormData();
       formData.append("jobId", jobId); // Long
       formData.append("referrerId", authUser.id); // Long
@@ -25,12 +38,7 @@ function ReferrJob() {
       formData.append("candidateEmail", data.candidateEmail); // String
       formData.append("note", data.note || "");
       formData.append("cvFile", data.cvFile[0]);
-      await createReferral(formData);
-      toast.success("Referred SuccessFully!!!");
-      navigate("/jobOpening");
-    } catch (e) {
-      handleGlobalError(e);
-    }
+      mutation.mutate(formData);
   };
 
   return (
@@ -103,10 +111,10 @@ function ReferrJob() {
         </div>
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={mutation.isPending}
           className="px-4 py-2 bg-black text-white rounded hover:bg-gray-700"
         >
-          {isSubmitting ? "Submiting..." : "Submit"}
+          {mutation.isPending ? "Submiting..." : "Submit"}
         </button>
       </form>
     </div>

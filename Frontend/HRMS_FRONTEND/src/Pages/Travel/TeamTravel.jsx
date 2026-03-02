@@ -5,6 +5,8 @@ import { useState, useEffect } from "react";
 import TravelDocEmployee from "./TravelDocEmployee";
 import { useAuthUserContext } from "../../Contexts/AuthUserContext";
 import { handleGlobalError } from "../../Services/GlobalExceptionService";
+import { useQuery } from "@tanstack/react-query";
+import { Loader } from "../../components/ui/Loader";
 function TeamTravel() {
   const { managerId } = useParams();
   const [empId, setEmpId] = useState(0);
@@ -13,23 +15,28 @@ function TeamTravel() {
   const { authUser, setAuthUser } = useAuthUserContext();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchTeamTravel = async () => {
-      try {
-        const response = await getTeamTravel(managerId);
-        console.log(response);
-        setTravels(response.data);
-      } catch (err) {
-        handleGlobalError(err)
-      }
-    };
-    fetchTeamTravel();
-  }, [managerId]);
+  const { data, error, isPending, isError, isSuccess } = useQuery({
+    queryKey: ["team-travel", managerId],
+    queryFn: () => {
+      return getTeamTravel(managerId);
+    },
+    staleTime: 5 * 60 * 200,
+  });
 
+  useEffect(() => {
+    setTravels(data?.data);
+  }, [data]);
+
+  if( isError ){
+    handleGlobalError(error)
+  }
+  if( isPending ){
+    return <Loader />
+  }
   if(authUser.role !== "MANAGER") return <p>you cannot access this page</p>
 
-  if (!travels || travels.length === 0) {
-    return <p className="text-gray-500">No travel records found.</p>;
+  if (isSuccess && !travels || travels.length === 0) {
+    return <p className="text-gray-500 text-center mt-40">No travel records found for you.</p>;
   }
   return (
     <>

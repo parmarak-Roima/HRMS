@@ -6,35 +6,35 @@ import { fetchEmployeeTravel } from "../../Services/TravelAssignment";
 import { fetchAllTravel } from "../../Services/TravelService";
 import { useNavigate } from "react-router-dom";
 import { handleGlobalError } from "../../Services/GlobalExceptionService";
+import { useQuery } from "@tanstack/react-query";
 const MyTravels = () => {
   const [travels, setTravels] = useState([]);
-  const [loading, setLoading] = useState(true);
   const { authUser, setAuthUser } = useAuthUserContext();
   const  navigate = useNavigate();
   
-  useEffect(() => {
-    const setEmployeeTravel = async () => {
-      try {
-        if (authUser.role == "EMPLOYEE" || authUser.role == "MANAGER") {
-          const response = await fetchEmployeeTravel(authUser.id);
-          setTravels(response.data);
+const { data, error, isPending, isError, isSuccess } = useQuery({
+    queryKey: ["my-travels"],
+    queryFn:async () => {
+      if (authUser.role == "EMPLOYEE" || authUser.role == "MANAGER") {
+          return await fetchEmployeeTravel(authUser.id);
         } else if (authUser.role == "HR") {
-          const response = await fetchAllTravel(authUser.id);
-          setTravels(response.data);
+         return await fetchAllTravel(authUser.id)
         }
-      } catch (e) {
-        setLoading(false);
-        handleGlobalError(e)
-      } finally {
-        setLoading(false);
-      }
-    };
-    setEmployeeTravel();
-  }, []);
+    },
+    staleTime: 5*20*600,
+  });
+
+  useEffect(() => {
+   setTravels(data?.data)
+  }, [data]);
+
+  if( isError ){
+    handleGlobalError(error);
+  }
 
   return (
     <div>
-      {loading ? (
+      {isPending ? (
         <Loader size={32} />
       ) : (
         <div className="min-h-screen bg-gray-50 p-8 font-sans">
@@ -71,7 +71,7 @@ const MyTravels = () => {
             </div>
           </div>
           <p className="text-gray-700 mb-1 text-2xl font-bold">
-            {travels.length == 0 && "No travels found for you!!!"}
+            {travels?.length == 0 && "No travels found for you!!!"}
           </p>
           <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {travels?.map((assignment) => (

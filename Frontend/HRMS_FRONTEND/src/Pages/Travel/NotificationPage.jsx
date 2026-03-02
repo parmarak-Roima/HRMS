@@ -8,38 +8,34 @@ import {
   marksAsRead,
 } from "../../Services/NotificationService";
 import { handleGlobalError } from "../../Services/GlobalExceptionService";
+import { useQuery } from "@tanstack/react-query";
 
 const NotificationPage = () => {
   const { userId } = useParams();
   const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(true);
+ 
+
+  const { data, error, isPending, isError, isSuccess } = useQuery({
+    queryKey: ["notifications",userId],
+    queryFn:async () => getAllNotifications(userId),
+    staleTime: 5*20*600,
+  });
 
   useEffect(() => {
-    fetchNotifications();
-  }, [userId]);
+    setNotifications(data?.data)
+  }, [data]);
 
-  const fetchNotifications = async () => {
-    try {
-      const res = await getAllNotifications(userId);
-      console.log(res)
-      setNotifications(res.data);
-      setLoading(false);
-    } catch (error) {
-      handleGlobalError(error)
-      setLoading(false);
-    } finally {
-      setLoading(false);
-    }
-  };
+  if( isError ){
+    handleGlobalError(error)
+  }
 
+ 
   const handleNotificationClick = async (id, read) => {
     if (read) return;
     try {
-      //set in frontend
       setNotifications((prev) =>
         prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
       );
-      //change in backend
       await marksAsRead(id);
     } catch (error) {
         handleGlobalError(error)
@@ -54,7 +50,7 @@ const NotificationPage = () => {
         </div>
       </div>
       <div className="space-y-4">
-        {loading ? (
+        {isPending ? (
           <Loader size={32} />
         ) : notifications?.length === 0 ? (
           <p className="text-center text-gray-500 py-10">

@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import { useAuthUserContext } from "../../Contexts/AuthUserContext";
 import { uploadTravelDocument } from "../../Services/TravelDocService";
 import { handleGlobalError } from "../../Services/GlobalExceptionService";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 export default function UploadDocument() {
   const { ownerId, travelId } = useParams();
   const { authUser, setAuthUser } = useAuthUserContext();
@@ -25,8 +26,23 @@ export default function UploadDocument() {
     },
   });
   const docType = ["TICKET", "POLICY", "PASSPORT", "OTHER"];
+
+   const queryClient = useQueryClient()
+
+   const mutation = useMutation({
+    mutationFn: uploadTravelDocument,
+    onSuccess:async () => {
+      await queryClient.invalidateQueries({ queryKey: ["travel-doc",travelId,authUser.id] });
+      toast.success("Document uploaded successfully!");
+      reset();
+      navigate("/travel");
+    },
+    onError: (error) => {
+      handleGlobalError(error);
+    }
+  });
+
   const onSubmit = async (data) => {
-    try {
       const formData = new FormData();
       formData.append("docTypeStr", data.docTypeStr);
       formData.append("file", data.file[0]);
@@ -34,13 +50,7 @@ export default function UploadDocument() {
         formData.append("ownerId", ownerId);
       }
       formData.append("travelId", travelId);
-      await uploadTravelDocument(formData);
-      toast.success("Document uploaded successfully!");
-      reset();
-      navigate("/travel");
-    } catch (error) {
-      handleGlobalError(error)
-    }
+      mutation.mutate(formData);
   };
 
   return (
@@ -83,7 +93,7 @@ export default function UploadDocument() {
             <p className="text-red-500 text-sm mt-1">{errors.file.message}</p>
           )}
         </div>
-        {authUser.role == "HR" && (
+        {authUser.role == "HR" && authUser.id != ownerId && (
           <div>
             <label>
               <input type="checkbox" checked={isAll} onChange={handleChange} />
@@ -94,10 +104,10 @@ export default function UploadDocument() {
 
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={mutation.isPending}
           className="px-4 py-2 bg-black text-white rounded hover:bg-gray-700"
         >
-          {isSubmitting ? "Uploading..." : "upload"}
+          {mutation.isPending ? "Uploading..." : "upload"}
         </button>
       </form>
     </div>

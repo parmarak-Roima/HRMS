@@ -7,6 +7,7 @@ import { handleGlobalError } from "../../Services/GlobalExceptionService";
 import { createJobOpening } from "../../Services/jobService";
 import { toast } from "react-toastify";
 import Select from "react-select";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 function CreateJob() {
   const { authUser, setAuthUser } = useAuthUserContext();
@@ -14,7 +15,7 @@ function CreateJob() {
   const [employees, setEmployees] = useState([]);
   const [hrs, setHrs] = useState([]);
   const [cvReviewers,setCvReviewers] = useState([]);
-
+  const queryClient = useQueryClient();
   useEffect(() => {
     getAllEmployees();
     getAllHrs();
@@ -54,8 +55,19 @@ function CreateJob() {
     formState: { errors, isSubmitting },
   } = useForm();
 
+ const mutation = useMutation({
+    mutationFn: createJobOpening,
+    onSuccess:async () => {
+      await queryClient.invalidateQueries({ queryKey: ['job-Openings'] });
+       toast.success("Job Created SuccessFully!!!");
+      navigate("/jobOpening");
+    },
+    onError: (error) => {
+      handleGlobalError(error);
+    }
+  });
+
   const onSubmit = async (data) => {
-    try {
       const formData = new FormData();
       formData.append("title", data.title);
       formData.append("summary", data.summary);
@@ -67,12 +79,7 @@ function CreateJob() {
           formData.append("cvReviewerIds",cvReviewerId)
         }
       )
-      await createJobOpening(formData);
-      toast.success("Referred SuccessFully!!!");
-      navigate("/jobOpening");
-    } catch (e) {
-      handleGlobalError(e);
-    }
+      mutation.mutate(formData);
   };
 
   const toggleEmployee = (id) => {
@@ -172,10 +179,10 @@ function CreateJob() {
           </div>
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={mutation.isPending}
           className="px-4 py-2 bg-black text-white rounded hover:bg-gray-700"
         >
-          {isSubmitting ? "Submiting..." : "Submit"}
+          {mutation.isPending ? "Submiting..." : "Submit"}
         </button>
       </form>
     </div>

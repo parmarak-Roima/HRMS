@@ -47,7 +47,7 @@ function CreateExpense() {
       await createExpense(formData);
       toast.success("Expense created successfully!");
       reset();
-      navigate(`/travel-expense/${travelAssignmentId}`)
+      navigate(`/travel`)
     } catch (error) {
       console.log(error);
       handleGlobalError(error);

@@ -1,5 +1,5 @@
 import { loginUser } from "../../Services/authService";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
@@ -13,6 +13,14 @@ export default function Login() {
   } = useForm();
     const navigate = useNavigate();
     const {authUser,setAuthUser} = useAuthUserContext();
+
+    useEffect(() => {
+     
+    localStorage.clear("token")
+      
+    }, [])
+    
+
   const handleLogin = async (data) => {
     try {
     const response = await loginUser(data);

@@ -45,7 +45,7 @@ public class JobOpeningController {
     //all jobs by status
     @GetMapping("/active")
     public ResponseEntity<ApiResponse<List<JobOpeningResponseDto>>> getActiveJobs() {
-        List<JobOpeningResponseDto> activeJobs = jobOpeningService.getAllActiveJobs();
+        List<JobOpeningResponseDto> activeJobs = jobOpeningService.getAllJobs();
         return ResponseEntity.ok(new ApiResponse<>("Fetched all active job openings", activeJobs));
     }
 

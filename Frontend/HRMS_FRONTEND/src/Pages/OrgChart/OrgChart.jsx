@@ -4,38 +4,46 @@ import { getOrgChartByEmailId, getOrgChartByEmpId } from '../../Services/OrgChar
 import OrgChartNode from '../../Componenets/OrgChart/OrgChartNode';
 import { Search } from 'lucide-react';
 import { handleGlobalError } from '../../Services/GlobalExceptionService';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+
 
 function OrgChart() {
-  const [chartData, setChartData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  // const [loading, setLoading] = useState(true);
+  const [chartData ,setChartData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const {empId} = useParams();
   const [currentId, setCurrentId] = useState(empId)
+  const queryClient = useQueryClient()
 
+  const {data , isPending,error,isError} = useQuery(
+    {
+      queryKey:['chartData',currentId],
+      queryFn: () =>  getOrgChartByEmpId(currentId),
+      staleTime:5*60*200
+    }
+  );
+  
     useEffect(() => {
-     const fetchOrgChart = async () =>{
-      try{
-        const res = await getOrgChartByEmpId(currentId)
-        setChartData(res.data)
-        setLoading(false)
-      }catch(e){
-        handleGlobalError(e);
-      }
-     }
-      fetchOrgChart();
-    }, [currentId])
+      setChartData(data)
+    }, [data])
    
   const handleSearch = async (e) => {
     try{
     e.preventDefault();
     const res =  await getOrgChartByEmailId(searchTerm);
-    setChartData(res.data)
+    setChartData(res)
     setSearchTerm("");
     }catch(e){
+      console.log(e)
       handleGlobalError(e);
     }
   };
-  if (loading) return <div className="text-center mt-20">Loading Org Chart...</div>;
+
+  if(isError && error){
+    console.log(error)
+    handleGlobalError(error)
+  }
+  if (isPending) return <div className="text-center mt-20">Loading Org Chart...</div>;
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -55,7 +63,7 @@ function OrgChart() {
         </form>
       </div>
       <div className="flex flex-col items-center">
-        {chartData.pathFromRoot.map((emp) => (
+        {chartData?.data?.pathFromRoot.map((emp) => (
           <div key={emp.id}>
             <OrgChartNode 
               employee={emp} 
@@ -67,17 +75,17 @@ function OrgChart() {
         ))}
         <div>
           <OrgChartNode 
-            employee={chartData.selectedEmployee} 
+            employee={chartData?.data?.selectedEmployee} 
             type="focus" 
             onClick={() => {}} 
           />
-          {chartData.directReports.length > 0 && <div className="w-px h-8  bg-gray-300 mx-auto"></div>}
+          {chartData?.data?.directReports.length > 0 && <div className="w-px h-8  bg-gray-300 mx-auto"></div>}
         </div>
-        {chartData.directReports.length > 0 && (
+        {chartData?.data?.directReports.length > 0 && (
           <div>
              <div className="text-center">Direct Reports</div>
              <div className="flex gap-10 justify-center">
-               {chartData.directReports.map((report) => (
+               {chartData?.data?.directReports.map((report) => (
                  <div key={report.id}>
                    <div className="w-px h-8  bg-gray-300 mx-auto"></div>
                     <OrgChartNode 

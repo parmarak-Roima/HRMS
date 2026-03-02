@@ -66,8 +66,8 @@ public class JobOpeningService {
         return mapToResponse(savedJob);
     }
 
-    public List<JobOpeningResponseDto> getAllActiveJobs() {
-        return jobRepo.findByStatus(JobOpening.JobStatus.ACTIVE)
+    public List<JobOpeningResponseDto> getAllJobs() {
+        return jobRepo.findAll()
                 .stream()
                 .map(
                         this::mapToResponse

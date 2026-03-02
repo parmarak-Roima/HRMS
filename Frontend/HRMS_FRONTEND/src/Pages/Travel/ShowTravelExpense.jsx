@@ -11,6 +11,7 @@ import { repondToExpense } from "../../Services/TravelExpenseService";
 import { getTravelAssignmentId } from "../../Services/TravelAssignment";
 import { Loader } from "../../components/ui/Loader";
 import { handleGlobalError } from "../../Services/GlobalExceptionService";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 function ShowTravelExpenses() {
   const [travelExpenseId, setTravelExpenseId] = useState(null);
@@ -22,34 +23,42 @@ function ShowTravelExpenses() {
   const [loading, setLoanding] = useState(true);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const getAllExpenses = async () => {
-      setLoanding(true);
-      try {
-        const response = await getTravelAssignmentId(travelId, empId);
-        setTravelAssignmentId(response.data);
-        if (travelAssignmentId) {
-          const response = await fetchTravelExpense(travelAssignmentId);
-          let totalApprovedExpense = 0;
-          response?.data?.map((travelExpense) => {
-            if (travelExpense?.status == "APPROVED") {
-              totalApprovedExpense += travelExpense.amount;
-            }
-          });
-          settotalExpense(totalApprovedExpense);
-          setTravelExpenses(response.data);
-          setFilteredExpenses(response.data)
-        }
-      } catch (err) {
-        setLoanding(false);
-       handleGlobalError(err)
-      } finally {
-        setLoanding(false);
-      }
-    };
-    getAllExpenses();
-  }, [travelAssignmentId]);
+  const { data, error, isPending, isError, isSuccess } = useQuery({
+    queryKey: ["travel-expenses", parseInt(travelAssignmentId)],
+    queryFn: () => {
+      return fetchTravelExpense(travelAssignmentId);
+    },
+    staleTime: 5 * 60 * 200,
+  });
 
+  useEffect(() => {
+    getAllExpenses();
+    if (travelAssignmentId) {
+      let totalApprovedExpense = 0;
+      data?.data.map((travelExpense) => {
+        if (travelExpense?.status == "APPROVED") {
+          totalApprovedExpense += travelExpense.amount;
+        }
+      });
+      settotalExpense(totalApprovedExpense);
+    }
+    setTravelExpenses(data?.data);
+    setFilteredExpenses(data?.data);
+  }, [data, travelAssignmentId]);
+
+  const getAllExpenses = async () => {
+    setLoanding(true);
+    try {
+      const response = await getTravelAssignmentId(travelId, empId);
+      setTravelAssignmentId(response.data);
+    } catch (err) {
+      setLoanding(false);
+      handleGlobalError(err);
+    } finally {
+      setLoanding(false);
+    }
+  };
+  const queryClient = useQueryClient();
   const [filters, setFilters] = useState({
     status: "",
     startDate: "",
@@ -57,9 +66,9 @@ function ShowTravelExpenses() {
   });
 
   const [filteredExpenses, setFilteredExpenses] = useState(null);
- 
+
   useEffect(() => {
-    const filtered = travelExpenses.filter((expense) => {
+    const filtered = travelExpenses?.filter((expense) => {
       if (filters.status && expense.status !== filters.status) {
         return false;
       }
@@ -96,8 +105,7 @@ function ShowTravelExpenses() {
     try {
       await submitExpenseById(travelExpenseId);
       toast.success("Submitted Successfully!!");
-      const updatedResponse = await fetchTravelExpense(travelAssignmentId);
-      setTravelExpenses(updatedResponse.data);
+      queryClient.invalidateQueries({queryKey:["travel-expenses",travelAssignmentId]})
     } catch (err) {
       toast.error(err?.data?.message);
     }
@@ -120,10 +128,10 @@ function ShowTravelExpenses() {
         status: "APPROVED",
       };
       await repondToExpense(travelExpenseId, payload);
-      const updatedResponse = await fetchTravelExpense(travelAssignmentId);
-      setTravelExpenses(updatedResponse.data);
+      queryClient.invalidateQueries({queryKey:["travel-expenses",travelAssignmentId]})
+      toast.success("approved successFully!!")
     } catch (err) {
-      handleGlobalError(err)
+      handleGlobalError(err);
     }
   };
 
@@ -135,16 +143,16 @@ function ShowTravelExpenses() {
       };
       await repondToExpense(travelExpenseId, payload);
       setTravelExpenseId(null);
-      const updatedResponse = await fetchTravelExpense(travelAssignmentId);
-      setTravelExpenses(updatedResponse.data);
+      toast.success("rejected successFully!!")
+      queryClient.invalidateQueries({queryKey:["travel-expenses",travelAssignmentId]})
     } catch (err) {
-      handleGlobalError(err)
+      handleGlobalError(err);
     }
   };
 
   return (
     <>
-      {loading ? (
+      {loading || isPending ? (
         <Loader size={32} />
       ) : (
         <>
@@ -191,43 +199,43 @@ function ShowTravelExpenses() {
                       </span>
                     </h2>
                     {/* filters */}
-                     <div className="bg-gray-50 p-4 rounded-lg mb-6 border border-gray-200">
-                        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                            <select
-                                name="status"
-                                value={filters.status}
-                                onChange={handleFilterChange}
-                                className="border rounded px-3 py-2 text-sm bg-white"
-                            >
-                                <option value="">All Statuses</option>
-                                <option value="DRAFT">Draft</option>
-                                <option value="SUBMITTED">Submitted</option>
-                                <option value="APPROVED">Approved</option>
-                                <option value="REJECTED">Rejected</option>
-                            </select>
-                            <input
-                                type="date"
-                                name="startDate"
-                                value={filters.startDate}
-                                onChange={handleFilterChange}
-                                className="border rounded px-3 py-2 text-sm"
-                                title="Start Date"
-                            />
-                            <input
-                                type="date"
-                                name="endDate"
-                                value={filters.endDate}
-                                onChange={handleFilterChange}
-                                className="border rounded px-3 py-2 text-sm"
-                                title="End Date"
-                            />
-                            <button 
-                                onClick={resetFilters}
-                                className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-medium py-2 px-4 rounded transition"
-                            >
-                                Reset Filters
-                            </button>
-                        </div>
+                    <div className="bg-gray-50 p-4 rounded-lg mb-6 border border-gray-200">
+                      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                        <select
+                          name="status"
+                          value={filters.status}
+                          onChange={handleFilterChange}
+                          className="border rounded px-3 py-2 text-sm bg-white"
+                        >
+                          <option value="">All Statuses</option>
+                          <option value="DRAFT">Draft</option>
+                          <option value="SUBMITTED">Submitted</option>
+                          <option value="APPROVED">Approved</option>
+                          <option value="REJECTED">Rejected</option>
+                        </select>
+                        <input
+                          type="date"
+                          name="startDate"
+                          value={filters.startDate}
+                          onChange={handleFilterChange}
+                          className="border rounded px-3 py-2 text-sm"
+                          title="Start Date"
+                        />
+                        <input
+                          type="date"
+                          name="endDate"
+                          value={filters.endDate}
+                          onChange={handleFilterChange}
+                          className="border rounded px-3 py-2 text-sm"
+                          title="End Date"
+                        />
+                        <button
+                          onClick={resetFilters}
+                          className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-medium py-2 px-4 rounded transition"
+                        >
+                          Reset Filters
+                        </button>
+                      </div>
                     </div>
                     <div className="flex justify-center mb-3">
                       {authUser.role == "EMPLOYEE" && (
@@ -245,11 +253,11 @@ function ShowTravelExpenses() {
                     </div>
                   </div>
                   <div className="space-y-4">
-                    {filteredExpenses.length === 0 ? (
+                    {filteredExpenses?.length === 0 ? (
                       <div className="text-center py-10 text-gray-500">
-                         {travelExpenses.length === 0 
-                            ? "No travel expenses yet!!!" 
-                            : "No expenses match your filters."}
+                        {travelExpenses?.length === 0
+                          ? "No travel expenses yet!!!"
+                          : "No expenses match your filters."}
                       </div>
                     ) : (
                       filteredExpenses?.map((travelExpense) => (

@@ -3,26 +3,33 @@ import { fetchAllDocs } from "../../Services/TravelDocService";
 import { useAuthUserContext } from "../../Contexts/AuthUserContext";
 import { useNavigate, useParams } from "react-router-dom";
 import { handleGlobalError } from "../../Services/GlobalExceptionService";
+import { useQuery } from "@tanstack/react-query";
+import { Loader } from "../../components/ui/Loader";
 function TravelDocEmployee() {
   const {travelId,empId} = useParams();
   const [documents, setDocuments] = useState([]);
   const { authUser, setAuthUser } = useAuthUserContext();
   const navigate = useNavigate();
   
+  const { data, error, isPending, isError, isSuccess } = useQuery({
+    queryKey: ["travel-doc",parseInt(travelId), parseInt(empId)],
+    queryFn: () => {
+      return fetchAllDocs(travelId, empId);
+    },
+    staleTime: 5 * 60 * 200,
+  });
+
   useEffect(() => {
-    const getAllDocs = async () => {
-      try {
-        const response = await fetchAllDocs(travelId, empId);
-        console.log(response);
-        setDocuments(response.data);
-      } catch (e) {
-        handleGlobalError(e)
-      }
-    };
-    getAllDocs();
-  }, [travelId, empId]);
+    setDocuments(data?.data);
+  }, [data]);
+
+  if (isError) {
+    handleGlobalError(error);
+  }
+  if( isPending){
+    return <Loader />
+  }
   
-  if( documents.length == 0 ) return  <p  className="text-2xl text-center font-semibold mb-4">No document uploaded yet !!</p>
   return (
     <>
       <div className="w-full bg-gray-100 p-6">
@@ -44,6 +51,11 @@ function TravelDocEmployee() {
                 </div>
             </div>
             <div className="space-y-4">
+                {isSuccess && documents?.length == 0 && (
+                <p className="text-2xl text-center font-semibold mb-4">
+                  No document uploaded yet !!
+                </p>
+              )}
               {documents?.map((doc) => (
                 <div
                   key={doc.id}

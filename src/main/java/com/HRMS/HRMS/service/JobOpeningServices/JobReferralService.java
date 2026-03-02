@@ -8,6 +8,7 @@ import com.HRMS.HRMS.dto.JobDtos.JobReferralResponseDto;
 import com.HRMS.HRMS.entity.Employee;
 import com.HRMS.HRMS.entity.JobEntities.JobOpening;
 import com.HRMS.HRMS.entity.JobEntities.JobReferral;
+import com.HRMS.HRMS.exception.BadRequestException;
 import com.HRMS.HRMS.exception.ForBiddenException;
 import com.HRMS.HRMS.exception.ResourceNotFoundException;
 import com.HRMS.HRMS.repository.Config.ConfigRepository;
@@ -59,13 +60,40 @@ public class JobReferralService {
         this.configService = configService;
     }
 
+    public Boolean exitsByJobIdReferrarIdAnd( Long jobId , String email ){
+        return referralRepo.existsJobReferralByJob_IdAndCandidateEmail(jobId,email);
+    }
+
+    public List<JobReferralResponseDto> getAllJobReferralForJobAndReferrer(Long jobOpeningId , Long empId){
+        if( !jobRepo.existsById(jobOpeningId) ){
+            throw new ResourceNotFoundException("job-opening not found !!");
+        }
+        List<JobReferral> jobReferrals = referralRepo.findByJobIdAndReferrarId(jobOpeningId,empId);
+        return jobReferrals.stream().map(
+                jobReferral -> {
+                    JobReferralResponseDto dto =  new JobReferralResponseDto();
+                    dto.setId(jobReferral.getId());
+                    dto.setNote(jobReferral.getNote());
+                    dto.setJobTitle(jobReferral.getJob().getTitle());
+                    dto.setCandidateEmail(jobReferral.getCandidateEmail());
+                    dto.setResumeUrl(jobReferral.getResumeUrl());
+                    dto.setReferrerEmail(jobReferral.getReferrer().getEmail());
+                    dto.setCandidateName(jobReferral.getCandidateName());
+                    dto.setStatus(jobReferral.getStatus().toString());
+                    return dto;
+                }
+        ).toList();
+    }
+
     public JobReferral createReferral(JobReferralCreateDto dto) {
         //fetch job and referrer
         JobOpening job = jobRepo.findById(dto.getJobId())
                 .orElseThrow(() -> new ResourceNotFoundException("Job Opening not found"));
         Employee referrer = employeeRepo.findById(dto.getReferrerId())
                 .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
-
+        if( referralRepo.existsJobReferralByJob_IdAndCandidateEmail( dto.getJobId(),dto.getCandidateEmail() ) ){
+            throw new BadRequestException("for this candidate email job-referral exists !!");
+        }
         //upload
         String resumeUrl = documentService.uploadFile(dto.getCvFile(), "referrals", dto.getReferrerId(), false);
         JobReferral referral = new JobReferral();
@@ -82,6 +110,9 @@ public class JobReferralService {
     }
 
     public List<JobReferralResponseDto> getAllJobReferralByJobOpening(Long jobOpeningId) {
+        if( !jobRepo.existsById(jobOpeningId) ){
+            throw new ResourceNotFoundException("job-opening not found !!");
+        }
         List<JobReferral> jobReferrals = referralRepo.findJobReferralByJobId(jobOpeningId);
         return jobReferrals.stream().map(
                 jobReferral -> {

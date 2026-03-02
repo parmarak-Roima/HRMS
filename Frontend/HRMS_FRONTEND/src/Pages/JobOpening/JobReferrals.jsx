@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
   getReferralByJobId,
+  getReferralByJobIdAndReferrar,
   updateJobReferralStatus,
 } from "../../Services/JobReferralService";
 import { useNavigate, useParams } from "react-router-dom";
@@ -8,36 +9,37 @@ import { handleGlobalError } from "../../Services/GlobalExceptionService";
 import { Loader } from "../../components/ui/Loader";
 import { useAuthUserContext } from "../../Contexts/AuthUserContext";
 import { toast } from "react-toastify";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 const statuses = ["NEW", "IN_REVIEW", "INTERVIEWING", "REJECTED", "HIRED"];
 function JobReferrals() {
   const { jobId } = useParams();
   const [jobReferrals, setjobReferrals] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const { authUser, setAuthUser } = useAuthUserContext();
   const [jobReferralId, setJobReferralId] = useState();
   const [status, setStatus] = useState();
-  useEffect(() => {
-    fetchJobReferrals();
-  }, []);
-
-  const fetchJobReferrals = async () => {
-    try {
-      const res = await getReferralByJobId(jobId);
-      console.log(res.data);
-      setjobReferrals(res.data);
-      setLoading(false);
-    } catch (e) {
-      handleGlobalError(e);
-      setLoading(false);
-    } finally {
-      setLoading(false);
+  const queryClient = useQueryClient();
+  //fetch job referrals
+  const { data, error, isPending, isError, isSuccess } = useQuery({
+    queryKey: ["job-referrals",jobId],
+    queryFn: () =>{ 
+      if(authUser.role == "HR"){
+      return getReferralByJobId(jobId)}
+    else{
+      return getReferralByJobIdAndReferrar(jobId);
     }
-  };
+    },
+    staleTime: 5*60*200,
+  });
+
+  useEffect(() => {
+    setjobReferrals(data?.data)
+  }, [data]);
 
   const submitStatusChange = async () => {
     try {
       await updateJobReferralStatus(jobReferralId, status);
-      fetchJobReferrals();
+      queryClient.invalidateQueries({queryKey:["job-referrals",jobId]})
       setJobReferralId(null);
       toast.success("status updated successFully!!");
     } catch (e) {
@@ -45,8 +47,8 @@ function JobReferrals() {
     }
   };
 
-if (authUser.role != "HR") {
-    return <p>Only hr can access this page !!</p>;
+  if(isError){
+    handleGlobalError(error);
   }
 
   return (
@@ -85,7 +87,7 @@ if (authUser.role != "HR") {
         </div>
       ) : (
         <>
-          {loading ? (
+          {isPending ? (
             <Loader size={32} />
           ) : (
             <div className="max-w-4xl mx-auto space-y-6 w-full bg-gray-100 p-6">
@@ -95,12 +97,12 @@ if (authUser.role != "HR") {
                     Job-referrals
                   </h2>
                   <div className="space-y-4">
-                    {jobReferrals.length === 0 ? (
+                    {jobReferrals?.length === 0 ? (
                       <div className="text-center py-10 text-gray-500">
                         No - Job referrals found for you !!!
                       </div>
                     ) : (
-                      jobReferrals.map((jobReferral) => (
+                      jobReferrals?.map((jobReferral) => (
                         <div
                           key={jobReferral.id}
                           className="bg-white shadow rounded-lg p-4 border border-gray-200 flex items-start gap-4"

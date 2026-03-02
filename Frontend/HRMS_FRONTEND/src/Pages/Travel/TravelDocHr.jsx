@@ -1,25 +1,33 @@
 import { useState, useEffect, use } from "react";
-import {fetchAllDocs} from "../../Services/TravelDocService";
+import { fetchAllDocs } from "../../Services/TravelDocService";
 import { useAuthUserContext } from "../../Contexts/AuthUserContext";
 import { useNavigate } from "react-router-dom";
 import { handleGlobalError } from "../../Services/GlobalExceptionService";
+import { useQuery } from "@tanstack/react-query";
+import { Loader } from "../../components/ui/Loader";
 function TravelDocHr({ travelId, empId }) {
   const [documents, setDocuments] = useState([]);
   const { authUser, setAuthUser } = useAuthUserContext();
   const navigate = useNavigate();
+
+  const { data, error, isPending, isError, isSuccess } = useQuery({
+    queryKey: ["travel-doc", parseInt(travelId), parseInt(empId)],
+    queryFn: () => {
+      return fetchAllDocs(travelId, empId);
+    },
+    staleTime: 5 * 60 * 200,
+  });
+
   useEffect(() => {
-    const getAllDocs = async () => {
-      try {
-        const response = await fetchAllDocs(travelId, empId);
-        console.log(response);
-        setDocuments(response.data);
-      } catch (e) {
-        handleGlobalError(e)
-      }
-    };
-    getAllDocs();
-  }, [travelId, empId]);
-  if( documents.length == 0 ) return  <p  className="text-2xl text-center font-semibold mb-4">No document uploaded yet !!</p>
+    setDocuments(data?.data);
+  }, [data]);
+
+  if (isError) {
+    handleGlobalError(error);
+  }
+  if( isPending){
+    return <Loader />
+  }
   return (
     <>
       <div className="w-full bg-gray-100 p-6">
@@ -29,18 +37,25 @@ function TravelDocHr({ travelId, empId }) {
               <h2 className="text-2xl text-center font-semibold mb-4">
                 Travel Documents
               </h2>
-                <div className="flex justify-end mb-3">
-                    {(authUser.role == "EMPLOYEE" || authUser.role == "HR" )&& 
+              <div className="flex justify-end mb-3">
+                {(authUser.role == "EMPLOYEE" || authUser.role == "HR") && (
                   <button
-                    onClick={() => {navigate(`/travel/uploadDocs/${empId}/${travelId}`)}}
+                    onClick={() => {
+                      navigate(`/travel/uploadDocs/${empId}/${travelId}`);
+                    }}
                     className="w-25 bg-black text-white font-medium py-2  px-3 rounded-2xl "
                   >
                     upload document
                   </button>
-                }   
-                </div>
+                )}
+              </div>
             </div>
             <div className="space-y-4">
+              {isSuccess && documents?.length == 0 && (
+                <p className="text-2xl text-center font-semibold mb-4">
+                  No document uploaded yet !!
+                </p>
+              )}
               {documents?.map((doc) => (
                 <div
                   key={doc.id}

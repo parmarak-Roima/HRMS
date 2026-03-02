@@ -51,11 +51,34 @@ public class JobReferralController {
         );
     }
 
+    @GetMapping("/Employee/{JobOpeningId}")
+    public ResponseEntity<ApiResponse<List<JobReferralResponseDto>>> allReferralForJobOpeningAndEmp(
+            @PathVariable Long JobOpeningId
+    ){
+        CustomUserPrincipal user = (CustomUserPrincipal)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        List<JobReferralResponseDto> responseDtos = jobReferralService.getAllJobReferralForJobAndReferrer(JobOpeningId,user.getId());
+        return new ResponseEntity<>(
+                new ApiResponse<>("All referrals fetched successfully !!",responseDtos),
+                HttpStatus.OK
+        );
+    }
+
     @PatchMapping("{jobReferralID}/{status}")
     public ResponseEntity<ApiResponse<String>> updateJobReferral(@PathVariable Long jobReferralID , @PathVariable String status ) {
         CustomUserPrincipal user = (CustomUserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return new ResponseEntity<>(
                 new ApiResponse<>("Status updated successFully for referral!", jobReferralService.updateJobReferralStatus(jobReferralID,status,user)),
+                HttpStatus.OK
+        );
+    }
+
+    @GetMapping("/Employee2/{JobOpeningId}/{email}")
+    public ResponseEntity<ApiResponse<Boolean>> exits(
+            @PathVariable Long JobOpeningId , @PathVariable String email
+    ){
+
+        return new ResponseEntity<>(
+                new ApiResponse<>("!!",jobReferralService.exitsByJobIdReferrarIdAnd(JobOpeningId,email)),
                 HttpStatus.OK
         );
     }

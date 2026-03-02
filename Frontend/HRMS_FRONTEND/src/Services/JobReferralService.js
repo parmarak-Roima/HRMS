@@ -12,6 +12,9 @@ export const createReferral = (data) => {
 export const getReferralByJobId = (jobId) => {
   return apiClient(`${CONTROLLER}/${jobId}`);
 };
+export const getReferralByJobIdAndReferrar = (jobId) => {
+  return apiClient(`${CONTROLLER}/Employee/${jobId}`);
+};
 
 export const updateJobReferralStatus = (jobReferrarlId, status) => {
   return apiClient.patch(

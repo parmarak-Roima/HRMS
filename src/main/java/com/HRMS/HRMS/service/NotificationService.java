@@ -91,7 +91,7 @@ public class NotificationService {
 //                log.error("Failed to send SSE to user " + recipient.getId(), e);
 //            }
 //        }
-        //flux way to send notification
+//        flux way to send notification
         NotificationDto dto = modelMapper.map(savedNotification, NotificationDto.class);
 
         FluxSink<ServerSentEvent<Object>> sink = sinks.get(recipient.getId());

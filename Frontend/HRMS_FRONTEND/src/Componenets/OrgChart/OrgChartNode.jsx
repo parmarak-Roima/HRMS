@@ -18,9 +18,9 @@ const OrgChartNode = ({ employee, type, onClick }) => {
         rounded-full flex items-center justify-center mb-3 overflow-hidden h-16 w-16 bg-black text-white
       `}
       >
-        {employee.profileUrl ? (
+        {employee?.profileUrl ? (
           <img
-            src={employee.profileUrl}
+            src={employee?.profileUrl}
             className="h-full w-full object-cover"
           />
         ) : (
@@ -28,11 +28,11 @@ const OrgChartNode = ({ employee, type, onClick }) => {
         )}
       </div>
       <div className="text-center">
-        <h3 className={`font-bold text-gray-900 text-lg`}>{employee.name}</h3>
+        <h3 className={`font-bold text-gray-900 text-lg`}>{employee?.name}</h3>
         <p
           className={`text-gray-500 uppercase tracking-wide text-sm font-semibold`}
         >
-          {employee.designation}
+          {employee?.designation}
         </p>
       </div>
     </div>

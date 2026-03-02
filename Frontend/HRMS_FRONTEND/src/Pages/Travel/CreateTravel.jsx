@@ -21,6 +21,7 @@ import { useAuthUserContext } from "../../Contexts/AuthUserContext";
 import { useNavigate } from "react-router-dom";
 import { handleGlobalError } from "../../Services/GlobalExceptionService";
 import Select from "react-select";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 function CreateTravel() {
   const { authUser, setAuthUser } = useAuthUserContext();
@@ -33,6 +34,7 @@ function CreateTravel() {
       try {
         const response = await fetchAllEmployee();
         setEmployees(response.data);
+        setLoading(false)
       } catch (err) {
         handleGlobalError(err);
       }
@@ -61,31 +63,27 @@ function CreateTravel() {
     resolver: zodResolver(createTravelSchema),
   });
 
-  const toggleEmployee = (id) => {
-    setSelectedEmployeeIds((prev) =>
-      prev.includes(id) ? prev.filter((empId) => empId !== id) : [...prev, id],
-    );
-  };
+  const queryClient = useQueryClient()
+
+   const mutation = useMutation({
+    mutationFn: createTravel,
+    onSuccess:async () => {
+      await queryClient.invalidateQueries({ queryKey: ["my-travels"] });
+       toast.success("Travel created successfully!");
+      form.reset();
+      navigate("/travel");
+    },
+    onError: (error) => {
+      handleGlobalError(error);
+    }
+  });
 
   const onSubmit = async (values) => {
-    try {
-      setLoading(true)
       const payload = {
         ...values,
         employeeIdsToAssign: selectedEmployees.map((option) => option.value),
       };
-      console.log(payload);
-      const res = await createTravel(payload);
-      toast.success("Travel created successfully!");
-      form.reset();
-      navigate("/travel");
-      setLoading(false)
-    } catch (err) {
-      setLoading(false)
-      handleGlobalError(err);
-    }finally{
-      setLoading(false)
-    }
+      mutation.mutate(payload);
   };
 
   if (authUser.role != "HR") return <p>you can not access this page !!</p>;
@@ -173,11 +171,11 @@ function CreateTravel() {
             value={selectedEmployees}
           />
           <button
-            disabled = {loading}
+            disabled = {mutation.isPending}
             className=" w-full px-4 py-1.5 mt-4 bg-black text-white rounded hover:bg-gray-700"
             type="submit"
           >
-            Create Travel
+            { mutation.isPending ? "Creating travel..." : "Create Travel" } 
           </button>
         </form>
       </Form>
