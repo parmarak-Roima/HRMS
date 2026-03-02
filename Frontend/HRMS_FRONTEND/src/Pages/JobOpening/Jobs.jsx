@@ -15,15 +15,21 @@ function Jobs() {
   const [statusFilter, setStatusFilter] = useState();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [isLastPage, setIsLastPage] = useState(false);
+
   const { data, error, isPending, isError, isSuccess } = useQuery({
-    queryKey: ["job-Openings"],
-    queryFn: getAllActiveJobs,
+    queryKey: ["job-Openings", currentPage],
+    queryFn: () => getAllActiveJobs(currentPage),
     staleTime: 5 * 20 * 600,
   });
 
   useEffect(() => {
-    setJobs(data?.data);
-    setFilteredJobs(data?.data);
+    setJobs(data?.content);
+    setFilteredJobs(data?.content);
+    setTotalPages(data?.totalPages);
+    setIsLastPage(data?.last);
   }, [data]);
 
   const closeJobOpening = async (jobId) => {
@@ -43,7 +49,7 @@ function Jobs() {
     } catch (e) {
       handleGlobalError(e);
     }
-  }
+  };
   const handleFilterChange = (status) => {
     if (status == "") {
       setFilteredJobs(jobs);
@@ -64,6 +70,18 @@ function Jobs() {
   if (!isPending && jobs?.length == 0) {
     return <p>Job Openings not found !!</p>;
   }
+  const handlePreviousPage = () => {
+    if (currentPage > 0) {
+      setCurrentPage((prev) => prev - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (!isLastPage) {
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
+
   return (
     <>
       {loading ? (
@@ -176,14 +194,12 @@ function Jobs() {
                                 </button>
                               </>
                             ) : (
-                               <button
-                                  onClick={() =>
-                                    reOpenJobOpening(job.id)
-                                  }
-                                  className="w-auto bg-black text-white text-sm py-1 px-3 mt-4 rounded  hover:bg-gray-700 "
-                                >
-                                  Re-Open Job-Opening
-                                </button>
+                              <button
+                                onClick={() => reOpenJobOpening(job.id)}
+                                className="w-auto bg-black text-white text-sm py-1 px-3 mt-4 rounded  hover:bg-gray-700 "
+                              >
+                                Re-Open Job-Opening
+                              </button>
                             )}
                           </div>
                         </div>
@@ -191,6 +207,38 @@ function Jobs() {
                     ))
                   )}
                 </div>
+                {!isPending && jobs?.length > 0 && (
+                  <div className="flex justify-between items-center mt-8 pt-4 border-t border-gray-200">
+                    <button
+                      onClick={handlePreviousPage}
+                      disabled={currentPage === 0}
+                      className={`px-4 py-2 rounded font-medium ${
+                        currentPage === 0
+                          ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                          : "bg-black text-white hover:bg-gray-800"
+                      }`}
+                    >
+                      Previous
+                    </button>
+
+                    <span className="text-sm text-gray-600 font-medium">
+                      Page {currentPage + 1} of{" "}
+                      {totalPages === 0 ? 1 : totalPages}
+                    </span>
+
+                    <button
+                      onClick={handleNextPage}
+                      disabled={isLastPage}
+                      className={`px-4 py-2 rounded font-medium ${
+                        isLastPage
+                          ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                          : "bg-black text-white hover:bg-gray-800"
+                      }`}
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>

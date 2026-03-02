@@ -2,6 +2,7 @@ package com.HRMS.HRMS.Controllers.Notification;
 
 import com.HRMS.HRMS.dto.ApiResponse;
 import com.HRMS.HRMS.dto.Notification.NotificationDto;
+import com.HRMS.HRMS.dto.PaginatedResponseDto;
 import com.HRMS.HRMS.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -39,8 +40,11 @@ public class NotificationController {
     }
 
     @GetMapping("/{empId}")
-    public ResponseEntity<ApiResponse<List<NotificationDto>>> getAllNotifications(@PathVariable Long empId) {
-        List<NotificationDto> notifications = notificationService.findByUserIdOrderByCreatedAtDesc(empId);
+    public ResponseEntity<ApiResponse<PaginatedResponseDto<NotificationDto>>> getAllNotifications(
+            @PathVariable Long empId,
+            @RequestParam(defaultValue = "0", required = false) int pageNo,
+            @RequestParam(defaultValue = "3", required = false) int pageSize) {
+        PaginatedResponseDto<NotificationDto> notifications = notificationService.findByUserIdOrderByCreatedAtDesc(pageNo,pageSize,empId);
         return ResponseEntity.ok(new ApiResponse<>("Fetched notifications", notifications));
     }
 

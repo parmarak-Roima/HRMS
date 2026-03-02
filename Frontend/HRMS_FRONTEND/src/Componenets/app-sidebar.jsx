@@ -30,6 +30,7 @@ import { useNavigate } from "react-router-dom";
 import { getUnreadCount } from "../Services/NotificationService";
 import { useEffect, useState } from "react";
 import HRMS from "../assets/HRMS.jpg"
+import { handleGlobalError } from "../Services/GlobalExceptionService";
 export function AppSidebar() {
   const { authUser, setAuthUser } = useAuthUserContext();
   const [notificationCount, setNotificationCount] = useState();
@@ -40,9 +41,13 @@ export function AppSidebar() {
   
     const fetchUnreadCount = async () => {
       try{
+        if( !authUser?.id ){
+          return
+        }
       const res = await getUnreadCount(authUser?.id);
       setNotificationCount(res.data);
       }catch(e){
+        console.log(e)
         handleGlobalError(e);
       }
     };

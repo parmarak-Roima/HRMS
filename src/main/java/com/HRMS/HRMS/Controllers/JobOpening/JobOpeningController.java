@@ -4,6 +4,7 @@ import com.HRMS.HRMS.dto.ApiResponse;
 import com.HRMS.HRMS.dto.JobDtos.JobOpeningResponseDto;
 import com.HRMS.HRMS.dto.JobDtos.JobOpeningCreateDto;
 import com.HRMS.HRMS.dto.JobDtos.ShareJobDto;
+import com.HRMS.HRMS.dto.PaginatedResponseDto;
 import com.HRMS.HRMS.service.JobOpeningServices.JobOpeningService;
 import com.HRMS.HRMS.service.JobOpeningServices.JobShareService;
 import jakarta.validation.Valid;
@@ -43,11 +44,11 @@ public class JobOpeningController {
     }
 
     //all jobs by status
-    @GetMapping("/active")
-    public ResponseEntity<ApiResponse<List<JobOpeningResponseDto>>> getActiveJobs() {
-        List<JobOpeningResponseDto> activeJobs = jobOpeningService.getAllJobs();
-        return ResponseEntity.ok(new ApiResponse<>("Fetched all active job openings", activeJobs));
-    }
+//    @GetMapping("/active")
+//    public ResponseEntity<ApiResponse<List<JobOpeningResponseDto>>> getActiveJobs() {
+//        List<JobOpeningResponseDto> activeJobs = jobOpeningService.getAllJobs();
+//        return ResponseEntity.ok(new ApiResponse<>("Fetched all active job openings", activeJobs));
+//    }
 
     // job by id
     @GetMapping("/{id}")
@@ -72,4 +73,14 @@ public class JobOpeningController {
         jobShareService.shareJob(dto);
         return ResponseEntity.ok(new ApiResponse<>("Job successfully shared with" + dto.getRecipientEmail() , dto.getRecipientEmail()));
     }
+
+    @GetMapping
+    public ResponseEntity<PaginatedResponseDto<JobOpeningResponseDto>> getAllJobs(
+            @RequestParam(defaultValue = "0", required = false) int pageNo,
+            @RequestParam(defaultValue = "3", required = false) int pageSize
+    ) {
+        return ResponseEntity.ok(jobOpeningService.getAllJobsByPage(pageNo, pageSize));
+    }
+
+
 }

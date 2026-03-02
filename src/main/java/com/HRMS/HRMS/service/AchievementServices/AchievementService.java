@@ -12,6 +12,7 @@ import com.HRMS.HRMS.service.Email.EmailContentBuilder;
 import com.HRMS.HRMS.service.Email.EmailService;
 import com.HRMS.HRMS.service.NotificationService;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import jakarta.persistence.criteria.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -61,7 +62,7 @@ public class AchievementService {
                 .toList();
     }
 
-    public List<AchievementPostResponseDto> getFeedUsingCriteriaQuery(Long currentEmployeeId, Long authorId, String tagName, LocalDateTime from, LocalDateTime to) {
+    public List<AchievementPostResponseDto> getFeedUsingCriteriaQuery(int startingPostNo, int pageSize, Long currentEmployeeId, Long authorId, String tagName, LocalDateTime from, LocalDateTime to) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<AchievementPost> cq = cb.createQuery(AchievementPost.class);
         Root<AchievementPost> post = cq.from(AchievementPost.class);
@@ -92,7 +93,12 @@ public class AchievementService {
         //  Ordering
         cq.orderBy(cb.desc(post.get("createdAt")));
 
-        List<AchievementPost> posts = em.createQuery(cq).getResultList();
+        Query query = em.createQuery(cq);
+
+        query.setFirstResult(startingPostNo);
+        query.setMaxResults(pageSize);
+
+        List<AchievementPost> posts = query.getResultList();
 
         return posts.stream()
                 .map(p -> mapToPostResponse(p, currentEmployeeId))

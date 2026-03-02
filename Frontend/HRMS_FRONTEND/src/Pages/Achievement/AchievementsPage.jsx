@@ -22,6 +22,8 @@ const AchievementsPage = () => {
     to: "",
   });
 
+  const [currentPage, setCurrentPage] = useState(0);
+
   const loadFeed = useCallback(async () => {
     try {
       setLoading(true);
@@ -30,15 +32,24 @@ const AchievementsPage = () => {
       if (filters.tagName) params.tagName = filters.tagName;
       if (filters.from) params.from = filters.from;
       if (filters.to) params.to = filters.to;
+      params.pageNo = currentPage;
       const response = await fetchFeed(params);
-      console.log(response);
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+      if (response.data.length == 0) {
+        toast.info("No more posts!!");
+        return;
+      }
       setPosts(response.data);
     } catch (e) {
       handleGlobalError(e);
     } finally {
       setLoading(false);
     }
-  }, [filters]);
+  }, [filters, currentPage]);
 
   useEffect(() => {
     loadFeed();
@@ -52,7 +63,7 @@ const AchievementsPage = () => {
 
   const handlePostUpdated = (updatedPost) => {
     setPosts((prev) =>
-      prev.map((p) => (p.id === updatedPost.id ? updatedPost : p))
+      prev.map((p) => (p.id === updatedPost.id ? updatedPost : p)),
     );
     setEditingPost(null);
     toast.success("Post updated successfully!");
@@ -68,8 +79,8 @@ const AchievementsPage = () => {
       prev.map((p) =>
         p.id === postId
           ? { ...p, likeCount: likeData.likeCount, likedByMe: likeData.liked }
-          : p
-      )
+          : p,
+      ),
     );
   };
 
@@ -110,6 +121,15 @@ const AchievementsPage = () => {
                 onLikeToggled={handleLikeToggled}
               />
             ))}
+
+            <button
+              onClick={() => {
+                setCurrentPage(currentPage + 1);
+              }}
+              className={`px-4 py-2 rounded font-medium ${"bg-black text-gray-400"}`}
+            >
+              Load more...
+            </button>
           </div>
         )}
       </div>

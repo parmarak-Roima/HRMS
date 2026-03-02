@@ -1,12 +1,18 @@
 package com.HRMS.HRMS.service;
 
+import com.HRMS.HRMS.dto.JobDtos.JobOpeningResponseDto;
 import com.HRMS.HRMS.dto.Notification.NotificationDto;
+import com.HRMS.HRMS.dto.PaginatedResponseDto;
 import com.HRMS.HRMS.entity.Employee;
+import com.HRMS.HRMS.entity.JobEntities.JobOpening;
 import com.HRMS.HRMS.entity.Notification;
 import com.HRMS.HRMS.repository.NotificationRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,12 +67,22 @@ public class NotificationService {
 //        return emitter;
 //    }
 
-    public List<NotificationDto> findByUserIdOrderByCreatedAtDesc(Long empId){
-        return notificationRepository.findByUserIdOrderByCreatedAtDesc(empId).stream().map(
+    public PaginatedResponseDto<NotificationDto> findByUserIdOrderByCreatedAtDesc(int pageNo , int pageSize, Long empId){
+        Pageable pageable = PageRequest.of(pageNo, pageSize);
+        Page<Notification> notificationsPage = notificationRepository.findByUserIdOrderByCreatedAtDesc(empId,pageable);
+        List<NotificationDto> notificationDtos = notificationsPage.getContent().stream().map(
                 notification -> {
                     return modelMapper.map(notification,NotificationDto.class);
                 }
         ).toList();
+        return PaginatedResponseDto.<NotificationDto>builder()
+                .content(notificationDtos)
+                .pageNo(notificationsPage.getNumber())
+                .pageSize(notificationsPage.getSize())
+                .totalElements(notificationsPage.getTotalElements())
+                .totalPages(notificationsPage.getTotalPages())
+                .last(notificationsPage.isLast())
+                .build();
     }
 
     public void sendNotification(Employee recipient, String message, String type, Long referenceId) {

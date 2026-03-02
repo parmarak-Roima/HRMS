@@ -2,6 +2,7 @@ package com.HRMS.HRMS.service.JobOpeningServices;
 
 import com.HRMS.HRMS.dto.JobDtos.JobOpeningCreateDto;
 import com.HRMS.HRMS.dto.JobDtos.JobOpeningResponseDto;
+import com.HRMS.HRMS.dto.PaginatedResponseDto;
 import com.HRMS.HRMS.dto.TravelDtos.ShowTravelDto;
 import com.HRMS.HRMS.entity.Employee;
 import com.HRMS.HRMS.entity.JobEntities.JobOpening;
@@ -13,8 +14,12 @@ import com.HRMS.HRMS.service.DocumentService;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -66,14 +71,34 @@ public class JobOpeningService {
         return mapToResponse(savedJob);
     }
 
-    public List<JobOpeningResponseDto> getAllJobs() {
-        return jobRepo.findAll()
-                .stream()
-                .map(
-                        this::mapToResponse
-                )
+    public PaginatedResponseDto<JobOpeningResponseDto> getAllJobsByPage(int pageNo, int pageSize ) {
+
+        Pageable pageable = PageRequest.of(pageNo, pageSize);
+
+        Page<JobOpening> jobsPage = jobRepo.findAll(pageable);
+
+        List<JobOpeningResponseDto> content = jobsPage.getContent().stream()
+                .map(this::mapToResponse)
                 .toList();
+
+        return PaginatedResponseDto.<JobOpeningResponseDto>builder()
+                .content(content)
+                .pageNo(jobsPage.getNumber())
+                .pageSize(jobsPage.getSize())
+                .totalElements(jobsPage.getTotalElements())
+                .totalPages(jobsPage.getTotalPages())
+                .last(jobsPage.isLast())
+                .build();
     }
+
+//    public List<JobOpeningResponseDto> getAllJobs( ) {
+//        return jobRepo.findAll()
+//                .stream()
+//                .map(
+//                        this::mapToResponse
+//                )
+//                .toList();
+//    }
 
     public JobOpeningResponseDto getJobById(Long id) {
         JobOpening job = jobRepo.findById(id)

@@ -75,4 +75,14 @@ public class TravelControllers {
         );
     }
 
+
+    @PatchMapping("/status")
+    public ResponseEntity<ApiResponse<Void>> updateStatus() {
+        travelService.markAsCompletedTravel();
+        return new ResponseEntity<>(
+                new ApiResponse<>("travel_for_hr",null ),
+                HttpStatus.OK
+        );
+    }
+
 }

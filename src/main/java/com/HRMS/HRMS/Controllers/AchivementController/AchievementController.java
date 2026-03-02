@@ -5,6 +5,7 @@ import com.HRMS.HRMS.dto.ApiResponse;
 import com.HRMS.HRMS.dto.AuthDtos.CustomUserPrincipal;
 import com.HRMS.HRMS.service.AchievementServices.AchievementService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -31,12 +32,14 @@ public class AchievementController {
             @RequestParam(required = false) Long authorId,
             @RequestParam(required = false) String tagName,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @RequestParam(defaultValue = "0", required = false) int pageNo,
+            @RequestParam(defaultValue = "10" , required = false)int pageSize
     ) {
         CustomUserPrincipal user = (CustomUserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         LocalDateTime fromDateTime = from != null ? from.atStartOfDay() : null;
         LocalDateTime toDateTime = to != null ? to.atTime(23, 59, 59) : null;
-        List<AchievementPostResponseDto> response = achievementService.getFeedUsingCriteriaQuery(user.getId(), authorId, tagName, fromDateTime, toDateTime);
+        List<AchievementPostResponseDto> response = achievementService.getFeedUsingCriteriaQuery(pageNo*pageSize+1,pageSize,user.getId(), authorId, tagName, fromDateTime, toDateTime);
         return ResponseEntity.ok(new ApiResponse<>("Feed fetched successfully", response));
     }
 //    Long empId,int pageNo , int pageSize , String sortDir,String sortBy

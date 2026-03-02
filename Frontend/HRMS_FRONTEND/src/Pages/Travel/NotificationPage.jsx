@@ -13,23 +13,26 @@ import { useQuery } from "@tanstack/react-query";
 const NotificationPage = () => {
   const { userId } = useParams();
   const [notifications, setNotifications] = useState([]);
- 
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [isLastPage, setIsLastPage] = useState(false);
 
   const { data, error, isPending, isError, isSuccess } = useQuery({
-    queryKey: ["notifications",userId],
-    queryFn:async () => getAllNotifications(userId),
-    staleTime: 5*20*600,
+    queryKey: ["notifications", userId, currentPage],
+    queryFn: async () => getAllNotifications(userId, currentPage),
+    staleTime: 5 * 20 * 600,
   });
 
   useEffect(() => {
-    setNotifications(data?.data)
+    setNotifications(data?.data.content);
+    setTotalPages(data?.data.totalPages);
+    setIsLastPage(data?.data.last);
   }, [data]);
 
-  if( isError ){
-    handleGlobalError(error)
+  if (isError) {
+    handleGlobalError(error);
   }
 
- 
   const handleNotificationClick = async (id, read) => {
     if (read) return;
     try {
@@ -38,10 +41,20 @@ const NotificationPage = () => {
       );
       await marksAsRead(id);
     } catch (error) {
-        handleGlobalError(error)
+      handleGlobalError(error);
+    }
+  };
+  const handlePreviousPage = () => {
+    if (currentPage > 0) {
+      setCurrentPage((prev) => prev - 1);
     }
   };
 
+  const handleNextPage = () => {
+    if (!isLastPage) {
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
   return (
     <div className="max-w-4xl mx-auto p-6 min-h-screen bg-white">
       <div className="flex items-center justify-between mb-8 border-b pb-4">
@@ -92,6 +105,37 @@ const NotificationPage = () => {
               </div>
             </div>
           ))
+        )}
+        {!isPending && notifications?.length > 0 && (
+          <div className="flex justify-between items-center mt-8 pt-4 border-t border-gray-200">
+            <button
+              onClick={handlePreviousPage}
+              disabled={currentPage === 0}
+              className={`px-4 py-2 rounded font-medium ${
+                currentPage === 0
+                  ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                  : "bg-black text-white hover:bg-gray-800"
+              }`}
+            >
+              Previous
+            </button>
+
+            <span className="text-sm text-gray-600 font-medium">
+              Page {currentPage + 1} of {totalPages === 0 ? 1 : totalPages}
+            </span>
+
+            <button
+              onClick={handleNextPage}
+              disabled={isLastPage}
+              className={`px-4 py-2 rounded font-medium ${
+                isLastPage
+                  ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                  : "bg-black text-white hover:bg-gray-800"
+              }`}
+            >
+              Next
+            </button>
+          </div>
         )}
       </div>
     </div>
