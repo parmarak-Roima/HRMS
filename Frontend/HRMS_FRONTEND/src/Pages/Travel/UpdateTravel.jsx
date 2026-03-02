@@ -1,8 +1,10 @@
-import { Controller, useForm } from "react-hook-form";
-import axios from "axios";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useAuthUserContext } from "../../Contexts/AuthUserContext";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { fetchTravelById, updateTravel } from "../../Services/TravelService";
+import { handleGlobalError } from "../../Services/GlobalExceptionService";
+import { useForm } from "react-hook-form";
 import {
   Form,
   FormControl,
@@ -11,87 +13,87 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { createTravelSchema } from "../../ValidationSchemas/createTravelSchema";
-import { toast } from "react-toastify";
-import { createTravel } from "../../Services/TravelService";
 import { zodResolver } from "@hookform/resolvers/zod/src/zod.js";
-import { useEffect, useState } from "react";
-import { fetchAllEmployee } from "../../Services/authService";
-import { useAuthUserContext } from "../../Contexts/AuthUserContext";
-import { useNavigate } from "react-router-dom";
-import { handleGlobalError } from "../../Services/GlobalExceptionService";
+import { toast } from "react-toastify";
 import Select from "react-select";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-function CreateTravel() {
+const statuses = ["SCHEDULED", "CANCELLED"];
+
+function UpdateTravel() {
+  const { travelId } = useParams();
   const { authUser, setAuthUser } = useAuthUserContext();
-  const [employees, setEmployees] = useState([]);
-  const [selectedEmployees, setSelectedEmployees] = useState([]);
-  const [loading,setLoading] = useState(true);
+  const [travel, settravel] = useState({});
+  const [travelStatus, setTravelStatus] = useState(travel?.status);
   const navigate = useNavigate();
-  useEffect(() => {
-    const getAllEmployee = async () => {
-      try {
-        const response = await fetchAllEmployee();
-        setEmployees(response.data);
-        setLoading(false)
-      } catch (err) {
-        handleGlobalError(err);
-      }
-    };
-    getAllEmployee();
-  }, []);
-
-  const options = employees.map((emp) => ({
-    value: emp.id,
-    label: emp.email,
-  }));
-
-  const handleChange = (selected) => {
-    setSelectedEmployees(selected);
-  };
+  const { data, error, isPending, isError, isSuccess } = useQuery({
+    queryKey: ["travel", parseInt(travelId)],
+    queryFn: () => {
+      return fetchTravelById(travelId);
+    },
+    staleTime: 5 * 60 * 200,
+  });
 
   const form = useForm({
     defaultValues: {
-      destination: "",
-      description: "",
-      startDate: "",
-      endDate: "",
-      status: "SCHEDULED",
-      requiredDocs: "",
+      ...travel,
     },
     resolver: zodResolver(createTravelSchema),
   });
 
-  const queryClient = useQueryClient()
-
-   const mutation = useMutation({
-    mutationFn: createTravel,
-    onSuccess:async () => {
-      await queryClient.invalidateQueries({ queryKey: ["my-travels"] });
-       toast.success("Travel created successfully!");
+  const options = statuses.map((status) => ({
+    value: status,
+    label: status,
+  }));
+  const handleChange = (selected) => {
+    setTravelStatus(selected);
+  };
+  const queryClient = useQueryClient();
+  const mutation = useMutation({
+    mutationFn: updateTravel,
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["my-travels"] }),
+        queryClient.invalidateQueries({ queryKey: ["travel",parseInt(travelId)] }),
+      ]);
+      toast.success("Travel updated successfully!");
       form.reset();
-      navigate("/travel");
+      navigate(`/travel/${travelId}/${authUser.id}`);
     },
     onError: (error) => {
       handleGlobalError(error);
-    }
+    },
   });
-
-  const onSubmit = async (values) => {
-      const payload = {
-        ...values,
-        employeeIdsToAssign: selectedEmployees.map((option) => option.value),
-      };
-       if (payload.startDate > payload.endDate) {
-              toast.warn("end date should be after start time");
-              return;
-      }
-      mutation.mutate(payload);
+  const onSubmit = async (data) => {
+    if (data.startDate > data.endDate) {
+      toast.warn("end date should be after start date");
+      return;
+    }
+    const payload = {
+      ...data,
+      status: travelStatus.value,
+      travelId: travelId,
+    };
+    mutation.mutate(payload);
   };
 
-  if (authUser.role != "HR") return <p>you can not access this page !!</p>;
+  useEffect(() => {
+    settravel(data?.data);
+    form.reset(data?.data);
+    setTravelStatus({
+      value: data?.data.status,
+      label: data?.data.status,
+    });
+  }, [data]);
 
+  if (isError) {
+    handleGlobalError(error);
+  }
+  if (isSuccess) {
+    console.log(travel);
+  }
   return (
     <div className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow">
       <h2 className="text-2xl font-bold mb-4">Create Travel</h2>
@@ -165,21 +167,19 @@ function CreateTravel() {
               </FormItem>
             )}
           />
-          <label className="block text-sm font-medium mb-2">
-            Assign Employees
-          </label>
+          <label className="block text-sm font-medium mb-2">Status</label>
           <Select
-            isMulti
             options={options}
             onChange={handleChange}
-            value={selectedEmployees}
+            value={travelStatus}
           />
           <button
-            disabled = {mutation.isPending}
+            // disabled = {mutation.isPending}
             className=" w-full px-4 py-1.5 mt-4 bg-black text-white rounded hover:bg-gray-700"
             type="submit"
           >
-            { mutation.isPending ? "Creating travel..." : "Create Travel" } 
+            {/* { mutation.isPending ? "Creating travel..." : "Create Travel" }  */}
+            Update
           </button>
         </form>
       </Form>
@@ -187,4 +187,4 @@ function CreateTravel() {
   );
 }
 
-export default CreateTravel;
+export default UpdateTravel;

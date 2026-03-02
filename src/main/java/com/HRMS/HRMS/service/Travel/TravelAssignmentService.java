@@ -126,6 +126,9 @@ public class TravelAssignmentService {
         dto.setDestination(entity.getTravel().getDestination());
         dto.setEmployeeId(entity.getEmployee().getId());
         dto.setEmployeeName(entity.getEmployee().getName());
+        dto.setStatus(entity.getTravel().getStatus());
+        dto.setStartDate(entity.getTravel().getStartDate());
+        dto.setEndDate(entity.getTravel().getEndDate());
         return dto;
     }
 

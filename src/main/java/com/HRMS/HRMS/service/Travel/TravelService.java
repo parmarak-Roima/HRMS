@@ -8,6 +8,7 @@ import com.HRMS.HRMS.dto.TravelDtos.CreateTravelDto;
 import com.HRMS.HRMS.dto.TravelDtos.ShowTravelDto;
 import com.HRMS.HRMS.entity.Employee;
 import com.HRMS.HRMS.entity.Enums.TravelStatus;
+import com.HRMS.HRMS.entity.JobEntities.JobOpening;
 import com.HRMS.HRMS.entity.TravelEntities.Travel;
 import com.HRMS.HRMS.entity.TravelEntities.TravelAssignment;
 import com.HRMS.HRMS.exception.BadRequestException;
@@ -23,6 +24,7 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -208,19 +210,42 @@ public class TravelService {
         return travelDto;
     }
 
+    @Scheduled(cron = "0 0 8 * * *")
+    public void markAsCompletedTravel(){
+        travelRepository.updateStatus(TravelStatus.SCHEDULED,TravelStatus.COMPLETED,LocalDate.now());
+    }
+    private boolean isTravelExitsForUpdate(Travel travel, Employee emp, LocalDate startDate , LocalDate endDate) {
+        List<TravelAssignment>  assignments  = travelAssignmentRepo.findByEmployeeId(emp.getId());
+        return assignments.stream().anyMatch(
+                (assignment)->{
+                    if( assignment.getTravel().getId().equals( travel.getId()) ) return false;
+                    boolean checkStartDate = (assignment.getTravel().getStartDate().isAfter(startDate) || assignment.getTravel().getStartDate().equals(startDate)) && (assignment.getTravel().getStartDate().isBefore(endDate) || assignment.getTravel().getStartDate().equals(endDate));
+                    boolean checkEndDate =  (assignment.getTravel().getEndDate().isAfter(startDate) || assignment.getTravel().getEndDate().equals(startDate)) && (assignment.getTravel().getEndDate().isBefore(endDate) || assignment.getTravel().getEndDate().equals(endDate));
+                    boolean checkOutOfRange = assignment.getTravel().getStartDate().isAfter(startDate) && assignment.getTravel().getEndDate().isBefore(endDate);
+                    boolean checkInsideOfRange = assignment.getTravel().getStartDate().isBefore(startDate) && assignment.getTravel().getEndDate().isAfter(endDate);
+
+                    return checkStartDate || checkEndDate || checkOutOfRange || checkInsideOfRange;
+                }
+        );
+    }
+
     @Transactional
     public ShowTravelDto updateTravel(Long id, CreateTravelDto travelDto,CustomUserPrincipal user) {
         Travel existingTravel = travelRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Travel Plan not found with ID: " + id));
-        //check if this travel is created by hr or not
-//        if( user.getRole().equals("HR") && !existingTravel.getCreatedBy().getId().equals(user.getId()) ){
-//            throw new ForBiddenException("you are not authorized to update this travel !!") ;
-//        }
+        for (TravelAssignment travelAssignment : existingTravel.getTravelAssignments()) {
+            if (isTravelExitsForUpdate(existingTravel, travelAssignment.getEmployee(), travelDto.getStartDate(), travelDto.getEndDate())) {
+                throw new BadRequestException("Employee " + travelAssignment.getEmployee().getEmail() + " already have travel for this date");
+            }
+        }
+        if( travelDto.getStatus() == TravelStatus.CANCELLED && existingTravel.getStartDate().isBefore(LocalDate.now()) ){
+            throw new BadRequestException("you can not cancel travel after start date !");
+        }
+
         modelMapper.map(travelDto, existingTravel);
         if (existingTravel.getEndDate().isBefore(existingTravel.getStartDate())) {
             throw new IllegalArgumentException("End Date cannot be before Start Date");
         }
-
         Travel updatedTravel = travelRepository.save(existingTravel);
         ShowTravelDto showTravelDto =  modelMapper.map(updatedTravel, ShowTravelDto.class);
         showTravelDto.setCreated_by_id(existingTravel.getCreatedBy().getId());

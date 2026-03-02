@@ -38,6 +38,7 @@ import NotFoundPage from "../Pages/NotFoundPage";
 import { fetchEmployeeById } from "../Services/authService";
 import { Loader } from "../components/ui/Loader";
 import ProfileLoader from "../Loaders/ProfileLoader";
+import UpdateTravel from "../Pages/Travel/UpdateTravel";
 
 export const router = createBrowserRouter([
   {
@@ -87,6 +88,7 @@ export const router = createBrowserRouter([
             element: <UploadDocument />,
           },
           { path: "manager/:managerId", element: <TeamTravel /> },
+          { path: "update/:travelId", element: <UpdateTravel /> },
         ],
       },
       {
