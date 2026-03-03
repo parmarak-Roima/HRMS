@@ -4,9 +4,11 @@ import { fetchTravelById } from "../../Services/TravelService";
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { handleGlobalError } from "../../Services/GlobalExceptionService";
+import { useAuthUserContext } from "../../Contexts/AuthUserContext";
 function TravelDetails({ travell }) {
   const [travel, setTravel] = useState(travell);
   const navigate = useNavigate();
+  const {authUser, setAuthUser} = useAuthUserContext()
   useEffect(() => {
     setTravel(travell);
   }, [travell]);
@@ -16,17 +18,26 @@ function TravelDetails({ travell }) {
         <div className="max-w-4xl mx-auto space-y-6">
           <div className="bg-white rounded-2xl shadow p-6">
             <div className="flex justify-between">
-            <h2 className="text-2xl text-center font-semibold mb-4">
-              Travel Details{" "}
-            </h2>
-            { travel?.status == "SCHEDULED" && 
-            <button
-              className="p-2 bg-black text-white font-medium py-0.5 rounded "
-              onClick={() => navigate(`/travel/update/${travel?.id}`)}
-            >
-              Update travel
-            </button>
-}
+              <h2 className="text-2xl text-center font-semibold mb-4">
+                Travel Details{" "}
+              </h2>
+              { authUser.role == "HR" && travel?.status == "SCHEDULED" && (
+                <div className="">
+                <button
+                  className="p-2 m-2 bg-black text-white font-medium py-0.5 rounded "
+                  onClick={() => navigate(`/travel/update/${travel?.id}`)}
+                >
+                  Update travel
+                </button>
+                 <button
+                className="p-2 bg-black text-white font-medium py-0.5 rounded "
+                onClick={() => navigate(`/travel/assign/${travel?.id}`)}
+              >
+                Assign-Employee
+              </button>
+              </div>
+              )}
+             
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>

@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { toast } from "react-toastify/unstyled";
 import { useAuthUserContext } from "../../Contexts/AuthUserContext";
 import { handleGlobalError } from "../../Services/GlobalExceptionService";
+import { cancelAssignment } from "../../Services/TravelAssignment";
 
 function TravelAssignments({ travell }) {
   const { authUser, setAuthUser } = useAuthUserContext();
@@ -12,7 +13,7 @@ function TravelAssignments({ travell }) {
   const [travel, setTravel] = useState({});
 
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     setTravel(travell);
   }, [travell]);
@@ -33,9 +34,32 @@ function TravelAssignments({ travell }) {
                 <div className="flex-1">
                   <p className="text-sm text-gray-500">email</p>
                   <p className="font-medium text-gray-800">{employee?.email}</p>
+                  {authUser.role == "HR" &&
+                    !travel?.cancelledEmployeeIds.includes(employee?.id) && (
+                      <button
+                        onClick={async () => {
+                          try {
+                            await cancelAssignment(travel.id, employee.id);
+                            toast.success("cancelled successFully!!");
+                          } catch (e) {
+                            handleGlobalError(e);
+                          }
+                        }}
+                        className="px-2 bg-gray-800 text-white font-medium py-2  mt-4 rounded "
+                      >
+                        Cancel-Assignment
+                      </button>
+                    )}
+                  {travel?.cancelledEmployeeIds.includes(employee?.id) && (
+                    <p className="text-sm font-extralight text-gray-500">
+                      Cancelled
+                    </p>
+                  )}
                 </div>
                 <div className="flex flex-col justify-center">
-                  {(authUser.role == "HR" || authUser.id == employee?.id) && (
+                  {(authUser.role == "HR" ||
+                    (authUser.id == employee?.id &&
+                      !travel.cancelledEmployeeIds.includes(authUser.id))) && (
                     <div>
                       <button
                         onClick={() => {

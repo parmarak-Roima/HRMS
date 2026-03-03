@@ -5,6 +5,7 @@ import com.HRMS.HRMS.entity.Employee;
 import com.HRMS.HRMS.entity.Enums.TravelStatus;
 import lombok.Data;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -18,6 +19,7 @@ public class ShowTravelDto {
     private TravelStatus status = TravelStatus.SCHEDULED; // Optional for Create (Defaults to SCHEDULED)
     private String requiredDocs;
     private List<EmployeeIdEmailDto> employeeIdsToAssign;
+    private List<Long> cancelledEmployeeIds = new ArrayList<>();
 }
 
 

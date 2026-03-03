@@ -5,6 +5,7 @@ import com.HRMS.HRMS.dto.AuthDtos.CustomUserPrincipal;
 import com.HRMS.HRMS.dto.EmailDtos.TravelEmailDto;
 import com.HRMS.HRMS.dto.EmailDtos.EmailSendingDto;
 import com.HRMS.HRMS.dto.TravelDtos.CreateTravelDto;
+import com.HRMS.HRMS.dto.TravelDtos.EmployeeStatusDto;
 import com.HRMS.HRMS.dto.TravelDtos.ShowTravelDto;
 import com.HRMS.HRMS.entity.Employee;
 import com.HRMS.HRMS.entity.Enums.TravelStatus;
@@ -103,7 +104,7 @@ public class TravelService {
                 notificationService.sendNotification(
                     emp, "you are assigned to travel!!", "travel", user.getId()
                 );
-                sendMail(emp,travel);
+                sendAssignedMail(emp,travel);
             }
         }
         notificationService.sendNotification(
@@ -119,7 +120,7 @@ public class TravelService {
         return modelMapper.map(savedTravel, CreateTravelDto.class);
     }
 
-    private boolean isTravelExits(Employee emp, LocalDate startDate , LocalDate endDate) {
+    public boolean isTravelExits(Employee emp, LocalDate startDate , LocalDate endDate) {
         List<TravelAssignment>  assignments  = travelAssignmentRepo.findByEmployeeId(emp.getId());
         return assignments.stream().anyMatch(
                 (assignment)->{
@@ -133,7 +134,7 @@ public class TravelService {
         );
     }
 
-    private void sendMail(Employee emp , Travel travel){
+    public void sendAssignedMail(Employee emp , Travel travel){
         String body = emailContentBuilder.buildEmail("travelAssign",new TravelEmailDto(
                 emp.getName(), travel.getDestination() , travel.getStartDate(), travel.getEndDate(),travel.getDescription()
         ));
@@ -202,9 +203,15 @@ public class TravelService {
         if (travelDto.getEmployeeIdsToAssign() == null) {
             travelDto.setEmployeeIdsToAssign(new ArrayList<>());
         }
-
         travel.getTravelAssignments().forEach(assignment ->
                 travelDto.getEmployeeIdsToAssign().add( new EmployeeIdEmailDto( assignment.getEmployee().getId(),assignment.getEmployee().getEmail()))
+        );
+        travel.getTravelAssignments().forEach(assignment ->
+                {
+                    if( assignment.getStatus().equals(TravelStatus.CANCELLED) ) {
+                        travelDto.getCancelledEmployeeIds().add(assignment.getEmployee().getId());
+                    }
+                }
         );
         travelDto.setCreated_by_id(travel.getCreatedBy().getId());
         return travelDto;
@@ -214,6 +221,7 @@ public class TravelService {
     public void markAsCompletedTravel(){
         travelRepository.updateStatus(TravelStatus.SCHEDULED,TravelStatus.COMPLETED,LocalDate.now());
     }
+
     private boolean isTravelExitsForUpdate(Travel travel, Employee emp, LocalDate startDate , LocalDate endDate) {
         List<TravelAssignment>  assignments  = travelAssignmentRepo.findByEmployeeId(emp.getId());
         return assignments.stream().anyMatch(
@@ -241,7 +249,13 @@ public class TravelService {
         if( travelDto.getStatus() == TravelStatus.CANCELLED && existingTravel.getStartDate().isBefore(LocalDate.now()) ){
             throw new BadRequestException("you can not cancel travel after start date !");
         }
-
+        if( travelDto.getStatus() == TravelStatus.CANCELLED ){
+            existingTravel.getTravelAssignments().forEach(
+                    assignment -> {
+                        assignment.setStatus(TravelStatus.CANCELLED);
+                    }
+            );
+        }
         modelMapper.map(travelDto, existingTravel);
         if (existingTravel.getEndDate().isBefore(existingTravel.getStartDate())) {
             throw new IllegalArgumentException("End Date cannot be before Start Date");

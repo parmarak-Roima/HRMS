@@ -35,13 +35,14 @@ public class TravelAssignmentControllers {
         return ResponseEntity.ok(new ApiResponse<>("Employee assigned successfully", response));
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping("/{travelId}/{empId}")
     @PreAuthorize("hasRole('HR')")
     public ResponseEntity<ApiResponse<TravelAssignmentResponseDto>> updateAssignment(
-            @PathVariable Long id,
+            @PathVariable Long travelId,
+            @PathVariable Long empId,
             @RequestBody TravelAssignmentUpdateDto dto) {
         CustomUserPrincipal user = (CustomUserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        TravelAssignmentResponseDto response = travelAssignmentService.updateAssignment(id, dto,user);
+        TravelAssignmentResponseDto response = travelAssignmentService.updateAssignment(travelId,empId, dto);
         return ResponseEntity.ok(new ApiResponse<>("Assignment updated successfully", response));
     }
 

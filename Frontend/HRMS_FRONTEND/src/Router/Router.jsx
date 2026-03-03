@@ -39,6 +39,7 @@ import { fetchEmployeeById } from "../Services/authService";
 import { Loader } from "../components/ui/Loader";
 import ProfileLoader from "../Loaders/ProfileLoader";
 import UpdateTravel from "../Pages/Travel/UpdateTravel";
+import AssignEmployee from "../Pages/Travel/AssignEmployee";
 
 export const router = createBrowserRouter([
   {
@@ -89,6 +90,7 @@ export const router = createBrowserRouter([
           },
           { path: "manager/:managerId", element: <TeamTravel /> },
           { path: "update/:travelId", element: <UpdateTravel /> },
+          { path: "assign/:travelId", element: <AssignEmployee /> },
         ],
       },
       {
