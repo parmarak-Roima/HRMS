@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -76,6 +77,29 @@ public class EmployeeService {
     public List<EmployeeIdEmailDto> allHrs() {
         List<Employee> employees = employeeRepository.findByRole_Id((long) 1);
         return employees.stream().map(
+                employee -> {return new EmployeeIdEmailDto( employee.getId(),employee.getEmail() );}
+        ).toList();
+    }
+
+    public List<EmployeeIdEmailDto> allBirthDayEmployee() {
+        List<Employee> employees = employeeRepository.findAll();
+        List<Employee> birthDayEmployee = employees.stream().filter(
+                (employee -> {
+                    return employee.getBirthdate().getDayOfMonth() == LocalDate.now().getDayOfMonth() && employee.getBirthdate().getMonth() == LocalDate.now().getMonth();
+                })
+        ).toList();
+        return birthDayEmployee.stream().map(
+                employee -> {return new EmployeeIdEmailDto( employee.getId(),employee.getEmail() );}
+        ).toList();
+    }
+    public List<EmployeeIdEmailDto> allJoiningDayEmployee() {
+        List<Employee> employees = employeeRepository.findAll();
+        List<Employee> joiningDayEmployee = employees.stream().filter(
+                (employee -> {
+                    return employee.getJoiningDate().getDayOfMonth() == LocalDate.now().getDayOfMonth() && employee.getJoiningDate().getMonth() == LocalDate.now().getMonth();
+                })
+        ).toList();
+        return joiningDayEmployee.stream().map(
                 employee -> {return new EmployeeIdEmailDto( employee.getId(),employee.getEmail() );}
         ).toList();
     }

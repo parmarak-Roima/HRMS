@@ -116,4 +116,20 @@ public class AuthController {
         );
     }
 
+    @GetMapping("/birthday")
+    public ResponseEntity<ApiResponse<List<EmployeeIdEmailDto>>> allBirthDayEmployee() {
+        return new ResponseEntity<>(
+                new ApiResponse<>("user data",employeeService.allBirthDayEmployee() ),
+                HttpStatus.OK
+        );
+    }
+
+    @GetMapping("/joiningAniversary")
+    public ResponseEntity<ApiResponse<List<EmployeeIdEmailDto>>> allJoiningDayEmployee() {
+        return new ResponseEntity<>(
+                new ApiResponse<>("user data",employeeService.allJoiningDayEmployee() ),
+                HttpStatus.OK
+        );
+    }
+
 }
