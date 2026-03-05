@@ -296,8 +296,7 @@ public class BookingRequestService {
 //    @Scheduled(cron = "0 * * * * *")
     public void assignSlotToMostPrior( ){
         log.info("CRON: Starting automated slot assignment process...");
-        //find slot that are after 30 minutes
-        List<GameSlot> gameSlotsForToday = gameSlotsRepository.findGameSlotByDateAndStatus(LocalDate.now().plusDays(1),GameSlot.SlotStatus.OPEN);
+        List<GameSlot> gameSlotsForToday = gameSlotsRepository.findGameSlotByDateAndStatus(LocalDate.now(),GameSlot.SlotStatus.OPEN);
         if( gameSlotsForToday.isEmpty()){
             log.info("CRON: No eligible OPEN slots found for assignment at this time.");
             return;

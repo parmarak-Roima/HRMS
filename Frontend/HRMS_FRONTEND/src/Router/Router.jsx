@@ -40,6 +40,7 @@ import { Loader } from "../components/ui/Loader";
 import ProfileLoader from "../Loaders/ProfileLoader";
 import UpdateTravel from "../Pages/Travel/UpdateTravel";
 import AssignEmployee from "../Pages/Travel/AssignEmployee";
+import OAuth2RedirectHandler from "../Pages/Auth/OAuth2RedirectHandler";
 
 export const router = createBrowserRouter([
   {
@@ -75,6 +76,7 @@ export const router = createBrowserRouter([
         HydrateFallback: Loader,
       },
       { path: "/login", element: <Login /> },
+      { path: "/oauth2/redirect", element: <OAuth2RedirectHandler /> },
       {
         path: "/travel",
         element: <Outlet />,

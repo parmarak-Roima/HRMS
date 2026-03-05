@@ -163,7 +163,7 @@ export function AppSidebar() {
                     <CommandEmpty>No results found.</CommandEmpty>
                     <CommandGroup heading="Suggestions">
                       {items.map((item) => (
-                        <HoverCard openDelay={10} closeDelay={100}>
+                        <HoverCard key={item.title} openDelay={10} closeDelay={100}>
                         <HoverCardTrigger asChild>
                           <SidebarMenuItem key={item.title}>
                           <SidebarMenuButton asChild>

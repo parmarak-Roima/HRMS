@@ -374,8 +374,8 @@ public class AchievementService {
                     && emp.getBirthdate().getDayOfMonth() == today.getDayOfMonth()) {
 
                 AchievementPost birthdayPost = AchievementPost.builder()
-                        .title("🎂 Happy Birthday, " + emp.getName() + "!")
-                        .description("Today is " + emp.getName() + "'s birthday! 🎉 Wish them a wonderful day!")
+                        .title("Happy Birthday, " + emp.getName() + "!")
+                        .description("Today is " + emp.getName() + "'s birthday! Wish them a wonderful day!")
                         .isSystemGenerated(true)
                         .systemEventType(AchievementPost.SystemEventType.BIRTHDAY)
                         .build();
@@ -390,8 +390,8 @@ public class AchievementService {
 
                 int years = Period.between(emp.getJoiningDate(), today).getYears();
                 AchievementPost anniversaryPost = AchievementPost.builder()
-                        .title("🎊 Work Anniversary — " + emp.getName())
-                        .description(emp.getName() + " completes " + years + " year" + (years > 1 ? "s" : "") + " at the organization! 🙌 Thank you for your dedication!")
+                        .title(" Work Anniversary — " + emp.getName())
+                        .description(emp.getName() + " completes " + years + " year" + (years > 1 ? "s" : "") + " at the organization!  Thank you for your dedication!")
                         .isSystemGenerated(true)
                         .systemEventType(AchievementPost.SystemEventType.ANNIVERSARY)
                         .build();
