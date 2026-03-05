@@ -66,15 +66,6 @@ public class TravelExpenseService {
 
         TravelAssignment assignment = assignmentRepo.findById(dto.getTravelAssignmentId())
                 .orElseThrow(() -> new ResourceNotFoundException("Travel Assignment not found"));
-        List<Long> assignmentEmployeeIds = assignment.getTravel().getTravelAssignments()
-                .stream()
-                .map(TravelAssignment -> {
-                    return TravelAssignment.getEmployee().getId();
-                })
-                .toList();
-        if(!assignmentEmployeeIds.contains(user.getId())){
-            throw new ForBiddenException("You can not create expense for this travel !");
-        }
         //Validations
         if (dto.getDate().isBefore(assignment.getStartDate())) {
             throw new BadRequestException("Expense date cannot be before assignment start date.");
@@ -122,15 +113,6 @@ public class TravelExpenseService {
     public TravelExpenseResponseDto updateExpenseEmployee(Long expenseId, CustomUserPrincipal user) {
         TravelExpense expense = expenseRepo.findById(expenseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Expense not found"));
-        List<Long> assignmentEmployeeIds = expense.getTravelAssignment().getTravel().getTravelAssignments()
-                .stream()
-                .map(travelAssignment -> {
-                    return travelAssignment.getEmployee().getId();
-                })
-                .toList();
-        if(!assignmentEmployeeIds.contains(user.getId())){
-            throw new ForBiddenException("You can not create update this expense!");
-        }
         if (expense.getStatus() == ExpenseStatus.APPROVED ) {
             throw new BadRequestException("Cannot edit expense that is Approved.");
         }

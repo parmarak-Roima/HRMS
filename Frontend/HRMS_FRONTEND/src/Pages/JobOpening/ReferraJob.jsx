@@ -7,8 +7,8 @@ import { handleGlobalError } from "../../Services/GlobalExceptionService";
 import { toast } from "react-toastify";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-function ReferrJob() {
-  const { jobId } = useParams();
+function ReferrJob({jobId}) {
+  
   const { authUser, setAuthUser } = useAuthUserContext();
   const navigate = useNavigate();
   const {
@@ -23,7 +23,6 @@ function ReferrJob() {
     onSuccess: async () => {
        await queryClient.invalidateQueries({ queryKey: ['job-referrals',jobId] });
       toast.success("Referred SuccessFully!!!");
-      navigate("/jobOpening");
     },
     onError: (error) => {
       handleGlobalError(error);

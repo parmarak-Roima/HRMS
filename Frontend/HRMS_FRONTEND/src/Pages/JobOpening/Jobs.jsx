@@ -6,6 +6,19 @@ import { useAuthUserContext } from "../../Contexts/AuthUserContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import ShareJob from "./ShareJob";
+import ReferrJob from "./ReferraJob";
 
 function Jobs() {
   const [jobs, setJobs] = useState([]);
@@ -162,18 +175,51 @@ function Jobs() {
                             </a>
                             {job.status == "ACTIVE" ? (
                               <>
-                                <button
-                                  onClick={() => navigate(`share/${job.id}`)}
+                                <Dialog>
+                                  <DialogTrigger>
+                                    <button
                                   className="w-auto bg-black text-white text-sm py-1 px-3 mt-4 rounded  hover:bg-gray-700 "
                                 >
                                   Share
                                 </button>
-                                <button
-                                  onClick={() => navigate(`referr/${job.id}`)}
+                                  </DialogTrigger>
+                                  <DialogContent>
+                                    <ShareJob jobId = {job.id}  />
+                                    <DialogFooter className="sm:justify-start">
+                                      <DialogClose asChild>
+                                        <Button
+                                          type="button"
+                                          className="w-full"
+                                        >
+                                          Close
+                                        </Button>
+                                      </DialogClose>
+                                    </DialogFooter>
+                                  </DialogContent>
+                                </Dialog>
+                                 <Dialog>
+                                  <DialogTrigger>
+                                    <button
                                   className="w-auto bg-black text-white text-sm py-1 px-3 mt-4 rounded  hover:bg-gray-700 "
                                 >
                                   Reffer
                                 </button>
+                                  </DialogTrigger>
+                                  <DialogContent>
+                                    <ReferrJob jobId = {job.id}  />
+                                    <DialogFooter className="sm:justify-start">
+                                      <DialogClose asChild>
+                                        <Button
+                                          type="button"
+                                          className="w-full"
+                                        >
+                                          Close
+                                        </Button>
+                                      </DialogClose>
+                                    </DialogFooter>
+                                  </DialogContent>
+                                </Dialog>
+                                
                                 {authUser.role == "HR" && (
                                   <>
                                     <button

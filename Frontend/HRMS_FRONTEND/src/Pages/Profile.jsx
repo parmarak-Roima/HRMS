@@ -2,7 +2,12 @@ import React, { useEffect } from "react";
 import { useLoaderData, useNavigate, useParams } from "react-router-dom";
 import { Loader } from "../components/ui/Loader";
 import { useState } from "react";
-import { fetchAllEmployee, fetchBirthDayEmployee, fetchEmployeeById, fetchJoiningDayEmployee } from "../Services/authService";
+import {
+  fetchAllEmployee,
+  fetchBirthDayEmployee,
+  fetchEmployeeById,
+  fetchJoiningDayEmployee,
+} from "../Services/authService";
 import { toast } from "react-toastify";
 import { useAuthUserContext } from "../Contexts/AuthUserContext";
 import { Button } from "@/components/ui/button";
@@ -35,7 +40,7 @@ function Profile() {
   const [Employee, setEmployee] = useState(useLoaderData());
   const { authUser, setAuthUser } = useAuthUserContext();
   const [birthdayEmployees, setBirthdayEmployees] = useState([]);
-  const [joiningDayEmployee, setJoiningDayEmployee] = useState([])
+  const [joiningDayEmployee, setJoiningDayEmployee] = useState([]);
   if (id != authUser.id) {
     return (
       <p className="text-center mt-4">
@@ -46,10 +51,10 @@ function Profile() {
   useEffect(() => {
     const getAllEmployee = async () => {
       try {
-        const response  = await fetchBirthDayEmployee();
+        const response = await fetchBirthDayEmployee();
         setBirthdayEmployees(response.data);
         const response2 = await fetchJoiningDayEmployee();
-        setJoiningDayEmployee(response2.data)
+        setJoiningDayEmployee(response2.data);
         setLoading(false);
       } catch (err) {
         handleGlobalError(err);
@@ -112,26 +117,6 @@ function Profile() {
                   </div>
                 </div>
               </CardContent>
-              <CardFooter className="m-auto">
-                <div>
-                  {authUser.role == "HR" && (
-                    <div>
-                      <button
-                        onClick={() => navigate("/config")}
-                        className="px-6 py-2 bg-black text-white border rounded-2xl"
-                      >
-                        Mail-config
-                      </button>
-                      <button
-                        onClick={() => navigate("/game/config")}
-                        className="px-6 py-2 bg-black text-white border rounded-2xl"
-                      >
-                        Game-Config
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </CardFooter>
             </Card>
           </div>
           <div className="grid md:grid-cols-2 gap-2 mt-3">
@@ -146,17 +131,20 @@ function Profile() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="overflow-y-scroll max-h-50">
-                  { birthdayEmployees.length == 0 && <p className="m-auto text-center font-extralight" >No party today...</p> }
+                  {birthdayEmployees.length == 0 && (
+                    <p className="m-auto text-center font-extralight">
+                      No party today...
+                    </p>
+                  )}
                   {birthdayEmployees?.map((emp) => (
                     <div className="w-full mt-2 bg-gray-100 p-6 rounded-2xl">
                       {emp.email}
                     </div>
                   ))}
                 </CardContent>
-               
               </Card>
             </div>
-             <div className="space-y-6">
+            <div className="space-y-6">
               <Card className="  ">
                 <CardHeader>
                   <CardTitle className="m-auto text-3xl font-bold">
@@ -167,17 +155,19 @@ function Profile() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="overflow-y-scroll max-h-50">
-                  { joiningDayEmployee.length == 0 && <p className="m-auto text-center font-extralight" >No party today...</p> }
+                  {joiningDayEmployee.length == 0 && (
+                    <p className="m-auto text-center font-extralight">
+                      No party today...
+                    </p>
+                  )}
                   {joiningDayEmployee?.map((emp) => (
                     <div className="w-full mt-2 bg-gray-100 p-6 rounded-2xl">
                       {emp.email}
                     </div>
                   ))}
                 </CardContent>
-                
               </Card>
             </div>
-            
           </div>
         </div>
       </div>

@@ -6,8 +6,8 @@ import { shareJob } from "../../Services/jobService";
 import { handleGlobalError } from "../../Services/GlobalExceptionService";
 import { toast } from "react-toastify";
 
-function ShareJob() {
-  const { jobId } = useParams();
+function ShareJob({jobId}) {
+  // const { jobId } = useParams();
   const { authUser, setAuthUser } = useAuthUserContext();
   const navigate = useNavigate();
   const {
@@ -25,7 +25,6 @@ function ShareJob() {
       };
       const res = await shareJob(payload);
       toast.success("Shared successFully!!!");
-      navigate("/jobOpening");
     } catch (e) {
       handleGlobalError(e);
     }

@@ -29,7 +29,7 @@ public class TravelExpenseController {
     }
 
     @PostMapping(consumes = "multipart/form-data")
-//    @PreAuthorize("hasRole('EMPLOYEE')")
+    @PreAuthorize("@assignmentAuth.isAssigned(#dto.travelAssignmentId)")
     public ResponseEntity<ApiResponse<TravelExpenseResponseDto>> createExpense(
            @Valid TravelExpenseCreateDto dto) {
         CustomUserPrincipal user = (CustomUserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -37,6 +37,7 @@ public class TravelExpenseController {
         return ResponseEntity.ok(new ApiResponse<>("Expense created successfully", response));
     }
     @GetMapping("/{travelAssignmentId}")
+    @PreAuthorize("@assignmentAuth.canAccessExpense(#travelAssignmentId)")
     public ResponseEntity<ApiResponse<List<TravelExpenseResponseDto>>> getTravelExpenseByTravelAssignmentId(
             @PathVariable Long travelAssignmentId  ) {
         CustomUserPrincipal user = (CustomUserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -44,7 +45,7 @@ public class TravelExpenseController {
         return ResponseEntity.ok(new ApiResponse<>("Travel expense for travel assignment !! ", response));
     }
     @PatchMapping(value = "/{travelExpenseId}/Employee")
-    @PreAuthorize("hasRole('EMPLOYEE')")
+    @PreAuthorize("hasRole('EMPLOYEE') AND @assignmentAuth.isAssigned(#travelExpenseId)")
     public ResponseEntity<ApiResponse<TravelExpenseResponseDto>> updateExpenseEmployee(
             @PathVariable Long travelExpenseId
             ) {

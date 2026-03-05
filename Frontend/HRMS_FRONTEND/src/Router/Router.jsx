@@ -127,8 +127,6 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: <Jobs /> },
           { path: "Create", element: <CreateJob /> },
-          { path: "share/:jobId", element: <ShareJob /> },
-          { path: "referr/:jobId", element: <ReferrJob /> },
           { path: "referrals/:jobId", element: <JobReferrals /> },
         ],
       },

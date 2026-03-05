@@ -54,7 +54,7 @@ function CreateExpense() {
     }
   };
 
-  if (authUser.role != "EMPLOYEE") {
+  if (authUser.role == "HR") {
     return <p>You can not create expense !!</p>;
   }
   

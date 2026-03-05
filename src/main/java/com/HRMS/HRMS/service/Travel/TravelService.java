@@ -165,38 +165,6 @@ public class TravelService {
         //find travel by id
         Travel travel = travelRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Travel Plan not found with ID: " + id));
-        //validate users
-        boolean authorized = false;
-        List<Long> assignmentEmployeeIds = travel.getTravelAssignments()
-                .stream()
-                .map(TravelAssignment -> {
-                    return TravelAssignment.getEmployee().getId();
-                })
-                .toList();
-        List<Long> assignmentManagerIds = travel.getTravelAssignments()
-                .stream()
-                .map(ta -> {
-                    if (ta.getEmployee().getManager() != null) {
-                        return ta.getEmployee().getManager().getId();
-                    }
-                    return null;
-                }) .filter(Objects::nonNull)
-                .toList();
-        switch (user.getRole()) {
-            case "HR" -> {
-                authorized = true;
-            }
-            case "EMPLOYEE" -> {
-                authorized = assignmentEmployeeIds.contains(user.getId());
-            }
-            case "MANAGER" -> {
-                authorized = assignmentManagerIds.contains(user.getId()) || assignmentEmployeeIds.contains(user.getId());
-            }
-            default -> authorized = false; // No access for other roles
-        }
-        if (!authorized) {
-            throw new ForBiddenException("You are not authorized to see this travel!");
-        }
         //return data
         ShowTravelDto travelDto =  modelMapper.map(travel, ShowTravelDto.class);
 

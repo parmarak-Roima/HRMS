@@ -47,6 +47,7 @@ public class TravelControllers {
     }
 
     @GetMapping("{id}")
+    @PreAuthorize("@assignmentAuth.canAccessTravel(#id)")
     public ResponseEntity<ApiResponse<ShowTravelDto>> getTravelById(@PathVariable Long id) {
         CustomUserPrincipal user = (CustomUserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return new ResponseEntity<>(
