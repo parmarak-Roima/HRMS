@@ -1,15 +1,13 @@
 package com.HRMS.HRMS.Controllers.Auth;
 
 import com.HRMS.HRMS.dto.ApiResponse;
-import com.HRMS.HRMS.dto.AuthDtos.AuthResponse;
-import com.HRMS.HRMS.dto.AuthDtos.EmployeeIdEmailDto;
-import com.HRMS.HRMS.dto.AuthDtos.LoginRequest;
-import com.HRMS.HRMS.dto.AuthDtos.CustomUserPrincipal;
+import com.HRMS.HRMS.dto.AuthDtos.*;
 import com.HRMS.HRMS.dto.userDtos.EmployeeCreateDTO;
 import com.HRMS.HRMS.dto.userDtos.EmployeeResponseDTO;
 import com.HRMS.HRMS.entity.Employee;
 import com.HRMS.HRMS.repository.RoleRepository;
 import com.HRMS.HRMS.service.EmployeeService;
+import com.HRMS.HRMS.service.ForgotPassWord.ForgotPassService;
 import com.HRMS.HRMS.utils.JwtUtils;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -37,16 +35,19 @@ public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final RoleRepository roleRepository;
+    private final ForgotPassService forgotPassService;
 
     public AuthController(
             EmployeeService employeeService,
             JwtUtils jwtUtils,
             AuthenticationManager authenticationManager,
+            ForgotPassService forgotPassService,
             RoleRepository roleRepository){
         this.employeeService = employeeService;
         this.authenticationManager = authenticationManager;
         this.jwtUtils = jwtUtils;
         this.roleRepository = roleRepository;
+        this.forgotPassService = forgotPassService;
     }
 
     @PostMapping("/register")
@@ -130,6 +131,23 @@ public class AuthController {
                 new ApiResponse<>("user data",employeeService.allJoiningDayEmployee() ),
                 HttpStatus.OK
         );
+    }
+
+    @PostMapping("/forgot-password/{email}")
+    public ResponseEntity<ApiResponse<Void>> forgotPassword(
+            @PathVariable String email
+    ) {
+        forgotPassService.sendOtp(email);
+        return new ResponseEntity<>( new ApiResponse<>("Otp sent successFully!!",null),HttpStatus.OK );
+    }
+
+    @PostMapping("/new-passoword/{email}")
+    public ResponseEntity<ApiResponse<Void>> newPassword(
+            @RequestBody NewPasswordDto newPasswordDto,
+            @PathVariable String email
+            ) {
+        forgotPassService.changePassword(email, newPasswordDto);
+        return new ResponseEntity<>( new ApiResponse<>("password changed successFully!!",null),HttpStatus.OK );
     }
 
 }
