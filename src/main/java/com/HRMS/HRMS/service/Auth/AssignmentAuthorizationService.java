@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -61,27 +62,37 @@ public class AssignmentAuthorizationService {
         //take a travel
         Travel travel = travelRepository.findById(travelId)
                 .orElseThrow(() -> new ResourceNotFoundException("Travel Plan not found with ID: " + travelId));
-        //take all assignment
-        List<Long> assignmentEmployeeIds = travel.getTravelAssignments()
-                .stream()
-                .map(TravelAssignment -> {
-                    return TravelAssignment.getEmployee().getId();
-                })
-                .toList();
+        List<Long> assignmentEmployeeIds;
+        if( travel.getTravelAssignments() == null ){
+            assignmentEmployeeIds = new ArrayList<>();
+        }else {
+            //take all assignment
+            assignmentEmployeeIds = travel.getTravelAssignments()
+                    .stream()
+                    .map(TravelAssignment -> {
+                        return TravelAssignment.getEmployee().getId();
+                    })
+                    .toList();
+        }
         String role = getRole();
         if( role.equals("EMPLOYEE") ) {
             //check that user assigned to the travel or not
             return assignmentEmployeeIds.contains(getCurrentUserId());
         } else if (role.equals("MANAGER")) {
-            List<Long> assignmentManagerIds = travel.getTravelAssignments()
-                    .stream()
-                    .map(ta -> {
-                        if (ta.getEmployee().getManager() != null) {
-                            return ta.getEmployee().getManager().getId();
-                        }
-                        return null;
-                    }) .filter(Objects::nonNull)
-                    .toList();
+            List<Long> assignmentManagerIds;
+            if( travel.getTravelAssignments() == null ){
+                assignmentManagerIds = new ArrayList<>();
+            }else {
+                assignmentManagerIds = travel.getTravelAssignments()
+                        .stream()
+                        .map(ta -> {
+                            if (ta.getEmployee().getManager() != null) {
+                                return ta.getEmployee().getManager().getId();
+                            }
+                            return null;
+                        }).filter(Objects::nonNull)
+                        .toList();
+            }
             return assignmentManagerIds.contains(getCurrentUserId()) || assignmentEmployeeIds.contains(getCurrentUserId());
         } else{
             return true;

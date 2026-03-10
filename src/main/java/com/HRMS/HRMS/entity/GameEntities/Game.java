@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "game",schema = "dbo")
+@Table(name = "game")
 @Data
 public class Game extends BaseEntity {
     @Id

@@ -32,17 +32,17 @@ public class OrgChartService {
         OrgChartDto response = new OrgChartDto();
         //set employee whose chart will be shown
         response.setSelectedEmployee(modelMapper.map(focus,EmployeeSummaryDto.class));
+        if( focus.getSubordinates() != null ) {
 
-        //direct reports
-        List<EmployeeSummaryDto> reports = focus.getSubordinates().stream()
-                .map(
-                        employee -> {
-                            return modelMapper.map(employee, EmployeeSummaryDto.class);
-                        }
-                )
-                .toList();
-        response.setDirectReports(reports);
-
+            List<EmployeeSummaryDto> reports = focus.getSubordinates().stream()
+                    .map(
+                            employee -> {
+                                return modelMapper.map(employee, EmployeeSummaryDto.class);
+                            }
+                    )
+                    .toList();
+            response.setDirectReports(reports);
+        }
         //ancestors
         List<EmployeeSummaryDto> ancestors = new ArrayList<>();
         Employee current = focus.getManager();

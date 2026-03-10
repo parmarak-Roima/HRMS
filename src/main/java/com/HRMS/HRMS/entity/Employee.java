@@ -65,7 +65,7 @@ public class Employee {
     @OneToMany(mappedBy = "employee",cascade = CascadeType.ALL , orphanRemoval = true)
     private List<TravelAssignment> travelAssignments = new ArrayList<>();
 
-    @OneToMany(mappedBy = "manager")
+    @OneToMany(mappedBy = "manager",cascade = CascadeType.ALL,orphanRemoval = true)
     private List<Employee> subordinates;
 
     @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL,orphanRemoval = true)

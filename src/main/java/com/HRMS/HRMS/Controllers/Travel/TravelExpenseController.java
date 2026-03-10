@@ -45,7 +45,7 @@ public class TravelExpenseController {
         return ResponseEntity.ok(new ApiResponse<>("Travel expense for travel assignment !! ", response));
     }
     @PatchMapping(value = "/{travelExpenseId}/Employee")
-    @PreAuthorize("hasRole('EMPLOYEE') AND @assignmentAuth.isAssigned(#travelExpenseId)")
+    @PreAuthorize("hasRole('EMPLOYEE') AND @assignmentAuth.isExpenseCreatedBy(#travelExpenseId)")
     public ResponseEntity<ApiResponse<TravelExpenseResponseDto>> updateExpenseEmployee(
             @PathVariable Long travelExpenseId
             ) {

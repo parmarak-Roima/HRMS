@@ -7,6 +7,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -29,6 +30,9 @@ public class ConfigService {
 
     public List<String> allKey(){
        List<Config> configs = configRepository.findAll();
+       if( configs.isEmpty() ){
+         return new ArrayList<>();
+       }
        return configs.stream().map(
                Config::getConfigKey
        ).toList();
